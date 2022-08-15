@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CalculatorMAUI.MainPage">
+
+    <ScrollView>
+        <VerticalStackLayout>
+            <Entry x:Name="txtDisplay" Text="{Binding Path=Display, Mode=TwoWay}" CursorPosition="{Binding Path=DisplayCaretPos, Mode=TwoWay}" 
+                   SelectionLength="{Binding Path=DisplaySelectedLength, Mode=TwoWay}" Unfocused="txtDisplay_Unfocused" 
+                   TextChanged="txtDisplay_TextChanged" />
+            <Label x:Name="lblMassage" Text="{Binding Path=ErrorMsg, Mode=TwoWay}" TextColor="Red" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Button x:Name="btn1" Text="1" Command="{Binding Insert}" CommandParameter="1" />
+                <Button x:Name="btn2" Text="2" Command="{Binding Insert}" Grid.Column="1" CommandParameter="2" />
+                <Button x:Name="btn3" Text="3" Command="{Binding Insert}" Grid.Column="2" CommandParameter="3"/>
+                <Button x:Name="btnAdd" Text="+" Command="{Binding Insert}" Grid.Column="3" CommandParameter="+"/>
+                <Button x:Name="btnSub" Text="-" Command="{Binding Insert}" Grid.Column="4" CommandParameter="-"/>
+
+                <Button x:Name="btn4" Text="4" CommandParameter="4" Grid.Row="1"/>
+                <Button x:Name="btn5" Text="5" Grid.Column="1" CommandParameter="5" Grid.Row="1"/>
+                <Button x:Name="btn6" Text="6" Grid.Column="2" CommandParameter="6" Grid.Row="1"/>
+                <Button x:Name="btnMul" Text="*" Grid.Column="3" CommandParameter="*" Grid.Row="1"/>
+                <Button x:Name="btnDiv" Text="/" Grid.Column="4" CommandParameter="/" Grid.Row="1"/>
+
+                <Button x:Name="btn7" Text="7" CommandParameter="7" Grid.Row="2"/>
+                <Button x:Name="btn8" Text="8" Grid.Row="2" CommandParameter="8" Grid.Column="1"/>
+                <Button x:Name="btn9" Text="9" Grid.Column="2" Grid.Row="2" CommandParameter="9"/>
+                <Button x:Name="btn0" Text="0" Grid.Row="3" CommandParameter="0"/>
+                <Button x:Name="btnEq" Text="=" Grid.Column="4" Grid.Row="3" Command="{Binding Calculate}"/>
+                <Button x:Name="btnLeftBracket" Text="(" Grid.Column="3" Grid.Row="2" CommandParameter="("/>
+                <Button x:Name="btnRightBracket" Text=")" Grid.Column="4" Grid.Row="2" CommandParameter=")"/>
+                <Button x:Name="btnSin" Text="sin" Grid.Row="4" CommandParameter="sin(" />
+                <Button x:Name="btnCos" Text="cos" Grid.Column="1" Grid.Row="4" CommandParameter="cos(" Grid.ColumnSpan="1" />
+                <Button x:Name="btnTan" Text="tan" Grid.Column="2" Grid.Row="4" CommandParameter="tan(" />
+                <Button x:Name="btnCot" Text="cot" Grid.Column="3" Grid.Row="4" CommandParameter="cot(" />
+                <Button x:Name="buttonPi" Text="pi" Grid.Row="4" Grid.Column="4" CommandParameter="3.1415926535897931"/>
+                <Button x:Name="btnPower" Text="^" Grid.Column="3" Grid.Row="3" CommandParameter="^" />
+                <Button x:Name="btnDot" Text="." Grid.Column="2" Grid.Row="3" CommandParameter="." />
+                <Button x:Name="btnBackspace" Text="&#9003;" Grid.Column="1" Grid.Row="3" Command="{Binding Backspace}" />
+            </Grid>
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
