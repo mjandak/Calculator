@@ -306,8 +306,8 @@ namespace MathExpressionParser
             }
             else
             {
-                //return 0;
-                throw new Exception();
+                return 0;
+                //throw new Exception();
             }
 
             var x1abs = Math.Abs(x1);

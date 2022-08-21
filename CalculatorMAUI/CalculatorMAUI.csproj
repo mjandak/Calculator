@@ -52,4 +52,16 @@
 	  <ProjectReference Include="..\MathExpressionParser\MathExpressionParser.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Compile Update="InsertBtn.xaml.cs">
+	    <DependentUpon>InsertBtn.xaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Update="InsertBtn.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	</ItemGroup>
+
 </Project>
