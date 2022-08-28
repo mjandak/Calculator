@@ -1,13 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="CalculatorMAUI.MainPage" xmlns:local="clr-namespace:CalculatorMAUI">
-    <Grid RowDefinitions="auto,auto,*" ColumnDefinitions="*">
-        <Entry x:Name="txtDisplay" Text="{Binding Path=Display, Mode=TwoWay}" CursorPosition="{Binding Path=DisplayCaretPos, Mode=TwoWay}" 
-                   SelectionLength="{Binding Path=DisplaySelectedLength, Mode=TwoWay}" Unfocused="txtDisplay_Unfocused" 
-                   TextChanged="txtDisplay_TextChanged" Grid.Row="0" />
-        <Label x:Name="lblMassage" Text="{Binding Path=ErrorMsg, Mode=TwoWay}" TextColor="Red" Grid.Row="1" />
-        <Grid ColumnSpacing="1" RowSpacing="1" Grid.Row="2">
+             x:Class="CalculatorMAUI.MainPage" xmlns:local="clr-namespace:CalculatorMAUI" BackgroundColor="{StaticResource Gray100}">
+    <Grid RowDefinitions="auto,*" ColumnDefinitions="*">
+        <Border Grid.Row="0" StrokeThickness="2" Stroke="{StaticResource Gray600}" Margin="8,8,8,0">
+            <Grid RowDefinitions="auto, auto" ColumnDefinitions="*">
+                <Entry x:Name="txtDisplay" Text="{Binding Path=Display, Mode=TwoWay}" CursorPosition="{Binding Path=DisplayCaretPos, Mode=TwoWay}"
+                       SelectionLength="{Binding Path=DisplaySelectedLength, Mode=TwoWay}" FontFamily="LcdSolid" FontSize="36"
+                       FontAutoScalingEnabled="True" BackgroundColor="{StaticResource LcdDisplay1}" Grid.Row="0" Margin="0" />
+                <Entry x:Name="txtMassage" Text="{Binding Path=ErrorMsg, Mode=TwoWay}" FontFamily="LcdSolid" 
+                       FontSize="12" FontAutoScalingEnabled="True" BackgroundColor="{StaticResource LcdDisplay1}" IsReadOnly="True" Grid.Row="1"
+                       Margin="0" />
+            </Grid>
+        </Border>
+        
+        <Grid ColumnSpacing="8" RowSpacing="8" Grid.Row="1" Margin="8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />

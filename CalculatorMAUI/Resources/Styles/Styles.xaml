@@ -25,12 +25,12 @@
 
     <Style TargetType="Button" ApplyToDerivedTypes="True">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource Gray100}}" />
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource White}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource White}}" />
         <Setter Property="FontFamily" Value="OpenSansRegular"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="CornerRadius" Value="8"/>
         <Setter Property="Padding" Value="0,0"/>
-        <Setter Property="BorderColor" Value="{StaticResource Gray400}"/>
+        <Setter Property="BorderColor" Value="{StaticResource Gray600}"/>
         <Setter Property="BorderWidth" Value="1"/>
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>

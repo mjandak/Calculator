@@ -24,15 +24,5 @@ namespace CalculatorMAUI
         {
             txtDisplay.Focus();
         }
-
-        private void txtDisplay_Unfocused(object sender, FocusEventArgs e)
-        {
-            //txtDisplay.Focus();
-        }
-
-        private void txtDisplay_TextChanged(object sender, TextChangedEventArgs e)
-        {
-
-        }
     }
 }

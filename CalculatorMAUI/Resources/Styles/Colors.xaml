@@ -41,4 +41,7 @@
     <Color x:Key="Blue200Accent">#72ACF1</Color>
     <Color x:Key="Blue300Accent">#A7CBF6</Color>
 
+    <Color x:Key="LcdDisplay1">#aaaf77</Color>
+    <Color x:Key="LcdDisplay2">#7e8c74</Color>
+    <Color x:Key="LcdDisplay3">#2e91c9</Color>
 </ResourceDictionary>
