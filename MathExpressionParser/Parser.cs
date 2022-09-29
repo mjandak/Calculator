@@ -277,9 +277,34 @@ namespace MathExpressionParser
                 {
                     ThrowBadChar(i);
                 }
-                if (HasSymbolSequenceEnded(previousState,currentState))
+                if (HasSymbolSequenceEnded(previousState, currentState))
                 {
-
+                    if (currentState == States.Digit)
+                    {
+                        T number3 = default(T);
+                        number3.TryParse(currentNum.ToString(), out number3);
+                        symbols.Push(new Number<T>(number3));
+                        currentNum.Clear();
+                    }
+                    else if (currentState == States.Function)
+                    {
+                        symbols.Push(new Operation<T>(currentFunc.ToString()));
+                        currentFunc.Clear();
+                    }
+                    else if (currentState == States.LeftBracket)
+                    {
+                        bracktets.Push('(');
+                        symbols.Push(new Symbol("("));
+                    }
+                    else if (currentState == States.RightBracket)
+                    {
+                        if (bracktets.Count < 1)
+                        {
+                            ThrowBadChar(i);
+                        }
+                        bracktets.Pop();
+                        symbols.Push(new Symbol(")"));
+                    }
                 }
                 else
                 {
