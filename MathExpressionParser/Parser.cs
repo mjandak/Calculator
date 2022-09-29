@@ -244,6 +244,71 @@ namespace MathExpressionParser
             }
         }
 
+        public static void CheckValidity2(string expr)
+        {
+            Stack<Symbol> symbols = new Stack<Symbol>();
+            Stack<char> bracktets = new();
+            States previousState = States.Start;
+            operators = new char[] { '+', '-', '*', '/', '^', };
+            string[] functions = new string[] { "sin", "cos", "tan", "cot" };
+            StringBuilder currentFunc = new();
+            StringBuilder currentNum = new();
+
+            States currentState = getState(expr[0]);
+            if (currentState == States.RightBracket)
+            {
+                ThrowBadChar(0);
+            }
+            if (currentState == States.Function)
+            {
+                currentFunc.Append(expr[0]);
+            }
+            else if (currentState == States.LeftBracket)
+            {
+                bracktets.Push('(');
+                symbols.Push(new("("));
+            }
+            previousState = currentState;
+
+            for (int i = 1; i < expr.Length; i++)
+            {
+                currentState = getState(expr[i]);
+                if (!IsStateAllowed(previousState, currentState))
+                {
+                    ThrowBadChar(i);
+                }
+                if (HasSymbolSequenceEnded(previousState,currentState))
+                {
+
+                }
+                else
+                {
+                    if (currentState == States.Digit)
+                    {
+                        currentNum.Append(expr[i]);
+                    }
+                    else if (currentState == States.Function)
+                    {
+                        currentFunc.Append(expr[i]);
+                    }
+                    else if (currentState == States.Whitespace)
+                    {
+
+                    }
+                }
+                previousState = currentState;
+            }
+
+            if (previousState == States.Function || previousState == States.LeftBracket || previousState == States.Operator)
+            {
+                throw new Exception("Unexpected end of expression.");
+            }
+            if (bracktets.Count > 0)
+            {
+                throw new Exception("Unexpected end of expression.");
+            }
+        }
+
         private static States getState(char ch)
         {
             if (char.IsDigit(ch))
@@ -277,23 +342,76 @@ namespace MathExpressionParser
             throw new Exception($"Unexpected character at {i}.");
         }
 
+        private static Dictionary<States, int> _wrongStates = new Dictionary<States, int>()
+        {
+            {States.Digit, (int)(States.RightBracket | States.Function) },
+            {States.Operator, (int)(States.LeftBracket | States.Operator) },
+            {States.LeftBracket, 0},
+            {States.RightBracket, (int)(States.Function | States.LeftBracket) },
+            {States.Function, (int)(States.Digit | States.Operator | States.RightBracket) }
+        };
+
+        private static bool IsStateAllowed(States prev, States current)
+        {
+            return (_wrongStates[prev] & (int)current) == 0;
+        }
+
+        private static bool HasSymbolSequenceEnded(States prev, States current)
+        {
+            //if (prev == States.Digit)
+            //{
+            //    return current == States.Operator || current == States.RightBracket || current == States.Whitespace;
+            //}
+            //if (prev == States.Function)
+            //{
+            //    return current == States.LeftBracket || current == States.Whitespace;
+            //}
+            if (prev == States.LeftBracket && current == States.LeftBracket)
+            {
+                return true;
+            }
+            if (prev == States.RightBracket && current == States.RightBracket)
+            {
+                return true;
+            }
+            if (prev == States.Whitespace)
+            {
+                return false;
+            }
+            return prev != current;
+        }
+
         enum States
         {
-            Start,
-            Digit,
-            Operator,
-            LeftBracket,
-            RightBracket,
-            Function,
-            Unknown
+            Start = 0,
+            Digit = 1,
+            Operator = 2,
+            LeftBracket = 4,
+            RightBracket = 8,
+            Function = 16,
+            Unknown = 32,
+            Whitespace = 64
         }
     }
 
-    public abstract class Node<T> where T : INumericOps<T>
+    public class Symbol
     {
+        public string Text { get; set; }
+
+        public Symbol(string text)
+        {
+            Text = text;
+        }
+    }
+
+    public abstract class Node<T> : Symbol where T : INumericOps<T>
+    {
+        public Node(string text) : base(text)
+        {
+
+        }
         public abstract Operation<T> Parent { get; set; }
         public abstract string ToJson();
-
         public abstract T Evalute();
     }
 
@@ -304,14 +422,12 @@ namespace MathExpressionParser
         private Node<T> _left;
         private Node<T> _right;
 
-        public Operation(string symbol)
+        public Operation(string symbol) : base(symbol)
         {
-            Symbol = symbol;
         }
 
-        public Operation(char symbol)
+        public Operation(char symbol) : base(symbol.ToString())
         {
-            Symbol = symbol.ToString();
         }
 
         public Node<T> Left
@@ -334,18 +450,16 @@ namespace MathExpressionParser
             }
         }
 
-        public string Symbol { get; set; }
-
         public override Operation<T> Parent { get; set; }
 
         public override string ToJson()
         {
-            return $"{{Symbol:\"{Symbol}\", Left:{Left.ToJson()}, Right:{Right.ToJson()}}}";
+            return $"{{Symbol:\"{Text}\", Left:{Left.ToJson()}, Right:{Right.ToJson()}}}";
         }
 
         public override T Evalute()
         {
-            switch (Symbol)
+            switch (Text)
             {
                 case "+":
                     return Left.Evalute().Add(Right.Evalute());
@@ -367,7 +481,7 @@ namespace MathExpressionParser
                     //return 1 / Math.Tan(Left.Evalute());
                     throw new NotImplementedException();
                 default:
-                    throw new Exception($"Unknown operation: {Symbol}");
+                    throw new Exception($"Unknown operation: {Text}");
             }
         }
     }
@@ -378,7 +492,7 @@ namespace MathExpressionParser
         public T Value { get; set; }
         public override Operation<T> Parent { get; set; }
 
-        public Number(T number)
+        public Number(T number) : base(number.ToString())
         {
             Value = number;
         }
