@@ -17,7 +17,17 @@ namespace MathExpressionParser
             {'/', 3}, //divide first to try to avoid OverflowException
             {'^', 4},
         };
-        private static char[] operators;
+        private static readonly string[] operators = new string[] { "+", "-", "*", "/", "^", };
+        private static readonly string[] functions = new string[] { "sin", "cos", "tan", "cot" };
+        private static Dictionary<States, int> _wrongStates = new Dictionary<States, int>()
+        {
+            {States.Digit, (int)(States.RightBracket | States.Function) },
+            {States.Operator, (int)(States.LeftBracket | States.Operator) },
+            {States.LeftBracket, 0},
+            {States.RightBracket, (int)(States.Function | States.LeftBracket) },
+            {States.Function, (int)(States.Digit | States.Operator | States.RightBracket) }
+        };
+        private static Stack<Symbol> symbols;
 
         public static int? FindFirstLowestPriorityOp(string expr)
         {
@@ -132,14 +142,8 @@ namespace MathExpressionParser
 
         public static void CheckValidity(string expr)
         {
-            //if (string.IsNull(expr))
-            //{
-            //    throw new InvalidOperationException();
-            //}
             Stack<char> bracktets = new Stack<char>();
             States previousState = States.Start;
-            operators = new char[] { '+', '-', '*', '/', '^', };
-            string[] functions = new string[] { "sin", "cos", "tan", "cot" };
             StringBuilder currentFunc = new();
 
             States currentState = getState(expr[0]);
@@ -246,11 +250,9 @@ namespace MathExpressionParser
 
         public static void CheckValidity2(string expr)
         {
-            Stack<Symbol> symbols = new Stack<Symbol>();
+            symbols = new Stack<Symbol>();
             Stack<char> bracktets = new();
             States previousState = States.Start;
-            operators = new char[] { '+', '-', '*', '/', '^', };
-            string[] functions = new string[] { "sin", "cos", "tan", "cot" };
             StringBuilder currentFunc = new();
             StringBuilder currentNum = new();
 
@@ -273,16 +275,28 @@ namespace MathExpressionParser
             for (int i = 1; i < expr.Length; i++)
             {
                 currentState = getState(expr[i]);
+                if (currentState == States.Unknown)
+                {
+                    ThrowBadChar(i);
+                }
                 if (!IsStateAllowed(previousState, currentState))
                 {
                     ThrowBadChar(i);
                 }
                 if (HasSymbolSequenceEnded(previousState, currentState))
                 {
+                    if (symbols.Peek() is Operation<T>)
+                    {
+                        if (!functions.Contains(symbols.Peek().Text) && !operators.Contains(symbols.Peek().Text))
+                        {
+                            throw new Exception($"Unknown function at {symbols.Peek().StartIdx}");
+                        }
+                    }
+                    //create new symbol
                     if (currentState == States.Digit)
                     {
-                        T number3 = default(T);
-                        number3.TryParse(currentNum.ToString(), out number3);
+                        T number3 = default;
+                        _ = number3.TryParse(currentNum.ToString(), out number3);
                         symbols.Push(new Number<T>(number3));
                         currentNum.Clear();
                     }
@@ -295,6 +309,11 @@ namespace MathExpressionParser
                     {
                         bracktets.Push('(');
                         symbols.Push(new Symbol("("));
+                    }
+                    else if (currentState == States.Operator)
+                    {
+                        symbols.Push(new Operation<T>(currentFunc.ToString()));
+                        currentFunc.Clear();
                     }
                     else if (currentState == States.RightBracket)
                     {
@@ -310,15 +329,13 @@ namespace MathExpressionParser
                 {
                     if (currentState == States.Digit)
                     {
+                        symbols.Peek().Text += expr[i];
                         currentNum.Append(expr[i]);
                     }
                     else if (currentState == States.Function)
                     {
+                        symbols.Peek().Text += expr[i];
                         currentFunc.Append(expr[i]);
-                    }
-                    else if (currentState == States.Whitespace)
-                    {
-
                     }
                 }
                 previousState = currentState;
@@ -348,7 +365,7 @@ namespace MathExpressionParser
             {
                 return States.RightBracket;
             }
-            else if (operators.Contains(ch))
+            else if (operators.Contains(ch.ToString()))
             {
                 return States.Operator;
             }
@@ -366,15 +383,6 @@ namespace MathExpressionParser
         {
             throw new Exception($"Unexpected character at {i}.");
         }
-
-        private static Dictionary<States, int> _wrongStates = new Dictionary<States, int>()
-        {
-            {States.Digit, (int)(States.RightBracket | States.Function) },
-            {States.Operator, (int)(States.LeftBracket | States.Operator) },
-            {States.LeftBracket, 0},
-            {States.RightBracket, (int)(States.Function | States.LeftBracket) },
-            {States.Function, (int)(States.Digit | States.Operator | States.RightBracket) }
-        };
 
         private static bool IsStateAllowed(States prev, States current)
         {
@@ -422,6 +430,8 @@ namespace MathExpressionParser
     public class Symbol
     {
         public string Text { get; set; }
+
+        public ushort StartIdx { get; set; }
 
         public Symbol(string text)
         {
