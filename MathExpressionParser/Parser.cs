@@ -21,11 +21,13 @@ namespace MathExpressionParser
         private static readonly string[] functions = new string[] { "sin", "cos", "tan", "cot" };
         private static Dictionary<States, int> _wrongStates = new Dictionary<States, int>()
         {
-            {States.Digit, (int)(States.RightBracket | States.Function) },
+            {States.Digit, (int)(States.LeftBracket | States.Function) },
             {States.Operator, (int)(States.LeftBracket | States.Operator) },
             {States.LeftBracket, 0},
             {States.RightBracket, (int)(States.Function | States.LeftBracket) },
-            {States.Function, (int)(States.Digit | States.Operator | States.RightBracket) }
+            {States.Function, (int)(States.Digit | States.Operator | States.RightBracket) },
+            {States.Start, 0 },
+            {States.Whitespace, 0},
         };
         private static Stack<Symbol> symbols;
 
@@ -248,33 +250,42 @@ namespace MathExpressionParser
             }
         }
 
-        public static void CheckValidity2(string expr)
+        public static Symbol[] CheckValidity2(string expr)
         {
             symbols = new Stack<Symbol>();
             Stack<char> bracktets = new();
             States previousState = States.Start;
+            States currentState;
             StringBuilder currentFunc = new();
             StringBuilder currentNum = new();
 
-            States currentState = getState(expr[0]);
-            if (currentState == States.RightBracket)
-            {
-                ThrowBadChar(0);
-            }
-            if (currentState == States.Function)
-            {
-                currentFunc.Append(expr[0]);
-            }
-            else if (currentState == States.LeftBracket)
-            {
-                bracktets.Push('(');
-                symbols.Push(new("("));
-            }
-            previousState = currentState;
+            //previousState = getState(expr[0]);
+            //if (currentState == States.RightBracket)
+            //{
+            //    ThrowBadChar(0);
+            //}
+            //if (currentState == States.Function)
+            //{
+            //    currentFunc.Append(expr[0]);
+            //}
+            //else if (currentState == States.LeftBracket)
+            //{
+            //    bracktets.Push('(');
+            //    symbols.Push(new("("));
+            //}
+            //previousState = currentState;
 
-            for (int i = 1; i < expr.Length; i++)
+            for (int i = 0; i <= expr.Length; i++)
             {
-                currentState = getState(expr[i]);
+                if (i == expr.Length)
+                {
+                    currentState = States.End;
+                }
+                else
+                {
+                    currentState = getState(expr[i]);
+                }
+                
                 if (currentState == States.Unknown)
                 {
                     ThrowBadChar(i);
@@ -283,39 +294,50 @@ namespace MathExpressionParser
                 {
                     ThrowBadChar(i);
                 }
+                if (currentState == States.Digit)
+                {
+                    //symbols.Peek().Text += expr[i];
+                    currentNum.Append(expr[i]);
+                }
+                else if (currentState == States.Function)
+                {
+                    //symbols.Peek().Text += expr[i];
+                    currentFunc.Append(expr[i]);
+                }
                 if (HasSymbolSequenceEnded(previousState, currentState))
                 {
-                    if (symbols.Peek() is Operation<T>)
-                    {
-                        if (!functions.Contains(symbols.Peek().Text) && !operators.Contains(symbols.Peek().Text))
-                        {
-                            throw new Exception($"Unknown function at {symbols.Peek().StartIdx}");
-                        }
-                    }
+                    //if (symbols.Peek() is Operation<T>)
+                    //{
+                    //    if (!functions.Contains(symbols.Peek().Text) && !operators.Contains(symbols.Peek().Text))
+                    //    {
+                    //        throw new Exception($"Unknown function at {symbols.Peek().StartIdx}");
+                    //    }
+                    //}
+
                     //create new symbol
-                    if (currentState == States.Digit)
+                    if (previousState == States.Digit)
                     {
                         T number3 = default;
                         _ = number3.TryParse(currentNum.ToString(), out number3);
                         symbols.Push(new Number<T>(number3));
                         currentNum.Clear();
                     }
-                    else if (currentState == States.Function)
+                    else if (previousState == States.Function)
                     {
                         symbols.Push(new Operation<T>(currentFunc.ToString()));
                         currentFunc.Clear();
                     }
-                    else if (currentState == States.LeftBracket)
+                    else if (previousState == States.LeftBracket)
                     {
                         bracktets.Push('(');
                         symbols.Push(new Symbol("("));
                     }
-                    else if (currentState == States.Operator)
+                    else if (previousState == States.Operator)
                     {
                         symbols.Push(new Operation<T>(currentFunc.ToString()));
                         currentFunc.Clear();
                     }
-                    else if (currentState == States.RightBracket)
+                    else if (previousState == States.RightBracket)
                     {
                         if (bracktets.Count < 1)
                         {
@@ -325,30 +347,31 @@ namespace MathExpressionParser
                         symbols.Push(new Symbol(")"));
                     }
                 }
-                else
-                {
-                    if (currentState == States.Digit)
-                    {
-                        symbols.Peek().Text += expr[i];
-                        currentNum.Append(expr[i]);
-                    }
-                    else if (currentState == States.Function)
-                    {
-                        symbols.Peek().Text += expr[i];
-                        currentFunc.Append(expr[i]);
-                    }
-                }
+                //else
+                //{
+                //    if (currentState == States.Digit)
+                //    {
+                //        //symbols.Peek().Text += expr[i];
+                //        currentNum.Append(expr[i]);
+                //    }
+                //    else if (currentState == States.Function)
+                //    {
+                //        //symbols.Peek().Text += expr[i];
+                //        currentFunc.Append(expr[i]);
+                //    }
+                //}
                 previousState = currentState;
             }
 
-            if (previousState == States.Function || previousState == States.LeftBracket || previousState == States.Operator)
-            {
-                throw new Exception("Unexpected end of expression.");
-            }
-            if (bracktets.Count > 0)
-            {
-                throw new Exception("Unexpected end of expression.");
-            }
+            //if (previousState == States.Function || previousState == States.LeftBracket || previousState == States.Operator)
+            //{
+            //    throw new Exception("Unexpected end of expression.");
+            //}
+            //if (bracktets.Count > 0)
+            //{
+            //    throw new Exception("Unexpected end of expression.");
+            //}
+            return symbols.ToArray();
         }
 
         private static States getState(char ch)
@@ -356,6 +379,14 @@ namespace MathExpressionParser
             if (char.IsDigit(ch))
             {
                 return States.Digit;
+            }
+            else if (char.IsLetter(ch))
+            {
+                return States.Function;
+            }
+            else if (char.IsWhiteSpace(ch))
+            {
+                return States.Whitespace;
             }
             else if (ch == '(')
             {
@@ -368,10 +399,6 @@ namespace MathExpressionParser
             else if (operators.Contains(ch.ToString()))
             {
                 return States.Operator;
-            }
-            else if (char.IsLetter(ch))
-            {
-                return States.Function;
             }
             else
             {
@@ -399,6 +426,10 @@ namespace MathExpressionParser
             //{
             //    return current == States.LeftBracket || current == States.Whitespace;
             //}
+            if (prev == States.Start)
+            {
+                return false;
+            }
             if (prev == States.LeftBracket && current == States.LeftBracket)
             {
                 return true;
@@ -423,10 +454,12 @@ namespace MathExpressionParser
             RightBracket = 8,
             Function = 16,
             Unknown = 32,
-            Whitespace = 64
+            Whitespace = 64,
+            End = 128
         }
     }
 
+    [DebuggerDisplay("{Text}")]
     public class Symbol
     {
         public string Text { get; set; }
@@ -450,7 +483,6 @@ namespace MathExpressionParser
         public abstract T Evalute();
     }
 
-    [DebuggerDisplay("{Symbol}")]
     public class Operation<T> : Node<T> where T : INumericOps<T>
     {
         private Node<T> _parent;
