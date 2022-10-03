@@ -293,12 +293,13 @@ namespace MathExpressionParser
                 }
                 if (symbols.First().Text == "(")
                 {
-                    //sub expr
+                    //sub-expression
                     return ParseExpr(symbols.Skip(1).Take(symbols.Length - 2).ToArray());
                 }
                 if (symbols.First() is Operation<T> fn)
                 {
                     //function
+                    fn.Left = ParseExpr(symbols.Skip(1).ToArray());
                     return fn;
                 }
                 return null;
