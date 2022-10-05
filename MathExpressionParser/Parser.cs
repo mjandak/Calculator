@@ -99,79 +99,6 @@ namespace MathExpressionParser
             return (fnName, fnParam);
         }
 
-        public static Node<T> ParseExpr(string expr)
-        {
-            CheckValidity(expr);
-            return ParseExpr(expr, 0);
-        }
-
-        public static Node<T> ParseExpr(string expr, int globalIdx)
-        {
-            int? opIdx = FindFirstLowestPriorityOp(expr);
-
-            if (opIdx == null)
-            {
-                //expr is a single number or expression in brackets or function
-                int firstSymIdx = skip(expr);
-                int lastSymIdx = skipLast(expr);
-                if (expr[firstSymIdx] == '(')
-                {
-                    //expression in brackets
-                    return ParseExpr(
-                        expr.Substring(firstSymIdx + 1, (lastSymIdx - 1) - (firstSymIdx + 1) + 1),
-                        globalIdx + firstSymIdx + 1);
-                }
-                else if (char.IsDigit(expr[firstSymIdx]))
-                {
-                    //number
-                    T number3 = default(T);
-                    number3.TryParse(expr, out number3);
-                    return new Number<T>(number3);
-                }
-                else
-                {
-                    //function
-                    var (fnName, fnParam) = GetFunctionParts(expr);
-                    var fn = new Operation<T>(fnName);
-                    fn.Left = ParseExpr(fnParam);
-                    return fn;
-                }
-            }
-
-            string left = expr.Substring(0, opIdx.Value);
-            string right = expr.Substring(opIdx.Value + 1, expr.Length - 1 - opIdx.Value);
-
-            var op = new Operation<T>(expr[opIdx.Value]);
-            op.Left = ParseExpr(left, globalIdx);
-            op.Right = ParseExpr(right, globalIdx + opIdx.Value + 1);
-
-            return op;
-        }
-
-        private static int skip(string s)
-        {
-            for (int i = 0; i < s.Length; i++)
-            {
-                if (!char.IsWhiteSpace(s[i]))
-                {
-                    return i;
-                }
-            }
-            return -1;
-        }
-
-        private static int skipLast(string s)
-        {
-            for (int i = s.Length - 1; i > -1; i--)
-            {
-                if (!char.IsWhiteSpace(s[i]))
-                {
-                    return i;
-                }
-            }
-            return -1;
-        }
-
         public static void CheckValidity(string expr)
         {
             Stack<char> bracktets = new Stack<char>();
@@ -278,6 +205,11 @@ namespace MathExpressionParser
             {
                 throw new Exception("Unexpected end of expression.");
             }
+        }
+
+        public static Node<T> ParseExpr(string expr)
+        {
+            return ParseExpr(CheckValidity2(expr));
         }
 
         public static Node<T> ParseExpr(Symbol[] symbols)
@@ -449,14 +381,6 @@ namespace MathExpressionParser
                 previousState = currentState;
             }
 
-            //if (previousState == States.Function || previousState == States.LeftBracket || previousState == States.Operator)
-            //{
-            //    throw new Exception("Unexpected end of expression.");
-            //}
-            //if (bracktets.Count > 0)
-            //{
-            //    throw new Exception("Unexpected end of expression.");
-            //}
             return _symbols.Reverse().ToArray();
         }
 
