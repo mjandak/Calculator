@@ -212,7 +212,7 @@ namespace MathExpressionParser
             return ParseExpr(CheckValidity2(expr));
         }
 
-        public static Node<T> ParseExpr(Symbol[] symbols)
+        private static Node<T> ParseExpr(Symbol[] symbols)
         {
             int? opIdx = FindFirstLowestPriorityOp2(symbols);
             if (opIdx == null)
@@ -266,7 +266,7 @@ namespace MathExpressionParser
             States currentState;
             StringBuilder currentFunc = new();
             StringBuilder currentNum = new();
-            bool currentNumDot = false;
+            bool currentHasNumDot = false;
 
             //previousState = getState(expr[0]);
             //if (currentState == States.RightBracket)
@@ -309,11 +309,11 @@ namespace MathExpressionParser
                     currentNum.Append(expr[i]);
                     if (expr[i] == '.')
                     {
-                        if (currentNumDot)
+                        if (currentHasNumDot)
                         {
                             ThrowBadChar(i);
                         }
-                        else { currentNumDot = true; }
+                        else { currentHasNumDot = true; }
                     }
                 }
                 else if (currentState == States.Function)
@@ -338,7 +338,7 @@ namespace MathExpressionParser
                         _ = number3.TryParse(currentNum.ToString(), out number3);
                         _symbols.Push(new Number<T>(number3));
                         currentNum.Clear();
-                        currentNumDot = false;
+                        currentHasNumDot = false;
                     }
                     else if (previousState == States.Function)
                     {
@@ -379,6 +379,11 @@ namespace MathExpressionParser
                 //    }
                 //}
                 previousState = currentState;
+            }
+
+            if (bracktets.Count != 0)
+            {
+                throw new Exception("Unexpected end of expression.");
             }
 
             return _symbols.Reverse().ToArray();
