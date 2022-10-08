@@ -31,36 +31,6 @@ namespace MathExpressionParser
         };
         private static Stack<Symbol> _symbols;
 
-        public static int? FindFirstLowestPriorityOp(string expr)
-        {
-            int lowestPriority = int.MaxValue;
-            int? ret = null;
-            ushort bracketsCount = 0;
-            for (int i = expr.Length - 1; i > -1; i--)
-            {
-                if (expr[i] == ')')
-                {
-                    bracketsCount++;
-                    continue;
-                }
-                else if (expr[i] == '(')
-                {
-                    bracketsCount--;
-                    continue;
-                }
-                if (bracketsCount > 0) continue;
-                if (_priorities.TryGetValue(expr[i].ToString(), out int priority))
-                {
-                    if (priority < lowestPriority)
-                    {
-                        lowestPriority = priority;
-                        ret = i;
-                    }
-                }
-            }
-            return ret;
-        }
-
         public static int? FindFirstLowestPriorityOp2(Symbol[] symbols)
         {
             int lowestPriority = int.MaxValue;
@@ -99,117 +69,9 @@ namespace MathExpressionParser
             return (fnName, fnParam);
         }
 
-        public static void CheckValidity(string expr)
-        {
-            Stack<char> bracktets = new Stack<char>();
-            States previousState = States.Start;
-            StringBuilder currentFunc = new();
-
-            States currentState = getState(expr[0]);
-            if (currentState == States.Operator || currentState == States.RightBracket)
-            {
-                ThrowBadChar(0);
-            }
-            if (currentState == States.Function)
-            {
-                currentFunc.Append(expr[0]);
-            }
-            else if (currentState == States.LeftBracket)
-            {
-                bracktets.Push('(');
-            }
-
-            for (int i = 1; i < expr.Length; i++)
-            {
-                if (char.IsWhiteSpace(expr[i]))
-                {
-                    continue;
-                }
-
-                currentState = getState(expr[i]);
-
-                if (currentState == States.RightBracket)
-                {
-                    if (bracktets.Peek() != '(' || bracktets.Count == 0)
-                    {
-                        throw new Exception($"Unexpected character at {i}.");
-                    }
-                    else
-                    {
-                        bracktets.Pop();
-                    }
-                }
-                else if (currentState == States.LeftBracket)
-                {
-                    bracktets.Push('(');
-                }
-                else if (currentState == States.Function)
-                {
-                    currentFunc.Append(expr[i]);
-                }
-
-                if (currentState == States.LeftBracket && previousState == States.Function)
-                {
-                    var currentFuncText = currentFunc.ToString();
-                    if (!functions.Contains(currentFuncText))
-                    {
-                        throw new Exception($"Unknown function: {currentFuncText} at {i - currentFuncText.Length}");
-                    }
-                    currentFunc.Clear();
-                }
-
-                if (previousState == States.Digit)
-                {
-                    if (currentState == States.LeftBracket || currentState == States.Function)
-                    {
-                        ThrowBadChar(i);
-                    }
-                }
-                if (previousState == States.LeftBracket)
-                {
-                    if (currentState == States.Operator || currentState == States.RightBracket)
-                    {
-                        ThrowBadChar(i);
-                    }
-                }
-                if (previousState == States.RightBracket)
-                {
-                    if (currentState == States.Digit || currentState == States.Function)
-                    {
-                        ThrowBadChar(i);
-                    }
-                }
-                if (previousState == States.Operator)
-                {
-                    if (currentState == States.Operator || currentState == States.RightBracket)
-                    {
-                        ThrowBadChar(i);
-                    }
-                }
-                if (previousState == States.Function)
-                {
-                    if (currentState == States.Digit || currentState == States.RightBracket)
-                    {
-                        ThrowBadChar(i);
-                    }
-                }
-
-                previousState = currentState;
-            }
-
-            if (previousState == States.Function || previousState == States.LeftBracket || previousState == States.Operator)
-            {
-                throw new Exception("Unexpected end of expression.");
-            }
-            if (bracktets.Count > 0)
-            {
-                throw new Exception("Unexpected end of expression.");
-            }
-        }
-
         public static Node<T> ParseExpr(string expr)
         {
-            return ParseExpr(CheckValidity2(expr));
+            return ParseExpr(CheckValidity(expr));
         }
 
         private static Node<T> ParseExpr(Symbol[] symbols)
@@ -237,28 +99,32 @@ namespace MathExpressionParser
                 return null;
             }
 
-            Operation<T> op = new(symbols[opIdx.Value].Text);
+            //new(symbols[opIdx.Value].Text);
+            if (symbols[opIdx.Value] is not Operation<T> op)
+            {
+                throw new Exception("Unexpected symbol.");
+            }
 
             Symbol[] left;
             if (opIdx == 0)
             {
-                T zero = default;
-                zero.TryParse(")", out zero);
-                op.Left = new Number<T>(zero);
+                //T zero = default;
+                //_ = zero.TryParse("0", out zero);
+                op.Left = new Number<T>("0", 0);
             }
             else
             {
                 left = symbols.Take(opIdx.Value).ToArray();
                 op.Left = ParseExpr(left);
             }
-            
+
             Symbol[] right = symbols.Skip(opIdx.Value + 1).ToArray();
             op.Right = ParseExpr(right);
-            
+
             return op;
         }
 
-        public static Symbol[] CheckValidity2(string expr)
+        public static Symbol[] CheckValidity(string expr)
         {
             _symbols = new Stack<Symbol>();
             Stack<char> bracktets = new();
@@ -334,26 +200,29 @@ namespace MathExpressionParser
                     //create new symbol
                     if (previousState == States.Digit)
                     {
-                        T number3 = default;
-                        _ = number3.TryParse(currentNum.ToString(), out number3);
-                        _symbols.Push(new Number<T>(number3));
+                        if (_symbols.TryPeek(out Symbol n) && n is Number<T>)
+                        {
+                            ThrowBadChar(i - currentNum.Length);
+                        }
+                        //T number3 = default;
+                        //_ = number3.TryParse(currentNum.ToString(), out number3);
+                        _symbols.Push(new Number<T>(currentNum.ToString(), i - currentNum.Length));
                         currentNum.Clear();
                         currentHasNumDot = false;
                     }
                     else if (previousState == States.Function)
                     {
-                        _symbols.Push(new Operation<T>(currentFunc.ToString()));
+                        _symbols.Push(new Operation<T>(currentFunc.ToString(), i - currentFunc.Length));
                         currentFunc.Clear();
                     }
                     else if (previousState == States.LeftBracket)
                     {
                         bracktets.Push('(');
-                        _symbols.Push(new Symbol("("));
+                        _symbols.Push(new Symbol("(", i - 1));
                     }
                     else if (previousState == States.Operator)
                     {
-                        _symbols.Push(new Operation<T>(expr[i - 1]));
-                        currentFunc.Clear();
+                        _symbols.Push(new Operation<T>(expr[i - 1], i - 1));
                     }
                     else if (previousState == States.RightBracket)
                     {
@@ -362,7 +231,7 @@ namespace MathExpressionParser
                             ThrowBadChar(i);
                         }
                         bracktets.Pop();
-                        _symbols.Push(new Symbol(")"));
+                        _symbols.Push(new Symbol(")", i - 1));
                     }
                 }
                 //else
@@ -481,15 +350,22 @@ namespace MathExpressionParser
 
         public ushort StartIdx { get; set; }
 
-        public Symbol(string text)
+        public Symbol(string text, ushort startIdx)
         {
             Text = text;
+            StartIdx = startIdx;
+        }
+
+        public Symbol(string text, int startIdx)
+        {
+            Text = text;
+            StartIdx = (ushort)startIdx;
         }
     }
 
     public abstract class Node<T> : Symbol where T : INumericOps<T>
     {
-        public Node(string text) : base(text)
+        public Node(string text, int startIdx) : base(text, startIdx)
         {
 
         }
@@ -504,11 +380,11 @@ namespace MathExpressionParser
         private Node<T> _left;
         private Node<T> _right;
 
-        public Operation(string symbol) : base(symbol)
+        public Operation(string symbol, int startIdx) : base(symbol, startIdx)
         {
         }
 
-        public Operation(char symbol) : base(symbol.ToString())
+        public Operation(char symbol, int startIdx) : base(symbol.ToString(), startIdx)
         {
         }
 
@@ -573,9 +449,17 @@ namespace MathExpressionParser
         public T Value { get; set; }
         public override Operation<T> Parent { get; set; }
 
-        public Number(T number) : base(number.ToString())
+        public Number(string number, int startIdx) : base(number, startIdx)
         {
-            Value = number;
+            T x = default;
+            if (x.TryParse(number, out x))
+            {
+                Value = x;
+            }
+            else
+            {
+                throw new Exception($"Invalid number string '{number}'.");
+            }
         }
 
         public override string ToJson()

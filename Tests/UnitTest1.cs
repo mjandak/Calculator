@@ -1,4 +1,5 @@
 using MathExpressionParser;
+using NUnit.Framework;
 
 namespace Tests
 {
@@ -12,73 +13,74 @@ namespace Tests
         [Test]
         public void CheckValidity()
         {
-            var r = Parser<DecimalFractionNumeric>.CheckValidity2("1 + 2/ 3-123 + sin(123)/cos(123 *   123 ) ");
-            r = Parser<DecimalFractionNumeric>.CheckValidity2("729^(1/2)");
-            r = Parser<DecimalFractionNumeric>.CheckValidity2("-2+9-(-8) ");
-            r = Parser<DecimalFractionNumeric>.CheckValidity2("(-2) +9- (-8) ");
-            r = Parser<DecimalFractionNumeric>.CheckValidity2("234.56*23.+123");
-            r = Parser<DecimalFractionNumeric>.CheckValidity2("234.56*23 5+123");
+            var r = Parser<DecimalFractionNumeric>.CheckValidity("1 + 2/ 3-123 + sin(123)/cos(123 *   123 ) ");
+            r = Parser<DecimalFractionNumeric>.CheckValidity("729^(1/2)");
+            r = Parser<DecimalFractionNumeric>.CheckValidity("-2+9-(-8) ");
+            r = Parser<DecimalFractionNumeric>.CheckValidity("(-2) +9- (-8) ");
+            r = Parser<DecimalFractionNumeric>.CheckValidity("234.56*23.+123");
+            r = Parser<DecimalFractionNumeric>.CheckValidity("234.56*.23+123");
 
-            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.CheckValidity2("8244.0735992+2.36.25")); //unexpected at 17
-            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.CheckValidity2(" 7+ (5 "));
-            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.CheckValidity2(" 7  + ((5* 3  )"));
-            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.CheckValidity2("234.56*23 5+123"));
+            r = Parser<DecimalFractionNumeric>.CheckValidity("234.56*23 5+123");
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.CheckValidity("8244.0735992+2.36.25")); //unexpected at 17
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.CheckValidity(" 7+ (5 "));
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.CheckValidity(" 7  + ((5* 3  )"));
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.CheckValidity("234.56*23 5+123"));
             //Assert.Pass();
         }
 
-        //[Test]
-        //public void ParserTest()
-        //{
-        //    Node<DecimalFractionNumeric> r2 = Parser<DecimalFractionNumeric>.ParseExpr("1 + 2");
-        //    DecimalFractionNumeric r3 = r2.Evalute();
+        [Test]
+        public void ParserTest()
+        {
+            Node<DecimalFractionNumeric> r2 = Parser<DecimalFractionNumeric>.ParseExpr("1 + 2");
+            DecimalFractionNumeric r3 = r2.Evalute();
 
-        //    r = Parser<DecimalFractionNumeric>.CheckValidity2(" 1 +2  ");
-        //    r2 = Parser<DecimalFractionNumeric>.ParseExpr(r);
-        //    r3 = r2.Evalute();
+            //r = Parser<DecimalFractionNumeric>.CheckValidity2(" 1 +2  ");
+            r2 = Parser<DecimalFractionNumeric>.ParseExpr(" 1 +2  ");
+            r3 = r2.Evalute();
 
-        //    r = Parser<DecimalFractionNumeric>.CheckValidity2("-1+2");
-        //    r2 = Parser<DecimalFractionNumeric>.ParseExpr(r);
-        //    r3 = r2.Evalute();
+            //r = Parser<DecimalFractionNumeric>.CheckValidity2("-1+2");
+            r2 = Parser<DecimalFractionNumeric>.ParseExpr("-1+2");
+            r3 = r2.Evalute();
 
-        //    r = Parser<DecimalFractionNumeric>.CheckValidity2("-1 + 2");
-        //    r2 = Parser<DecimalFractionNumeric>.ParseExpr(r);
-        //    r3 = r2.Evalute();
+            //r = Parser<DecimalFractionNumeric>.CheckValidity2("-1 + 2");
+            r2 = Parser<DecimalFractionNumeric>.ParseExpr("-1 + 2");
+            r3 = r2.Evalute();
 
-        //    r = Parser<DecimalFractionNumeric>.CheckValidity2("  -3+ 2 ");
-        //    r2 = Parser<DecimalFractionNumeric>.ParseExpr(r);
-        //    r3 = r2.Evalute();
+            //r = Parser<DecimalFractionNumeric>.CheckValidity2("  -3+ 2 ");
+            r2 = Parser<DecimalFractionNumeric>.ParseExpr("  -3+ 2 ");
+            r3 = r2.Evalute();
 
-        //    r = Parser<DecimalFractionNumeric>.CheckValidity2("1+(2/3)");
-        //    r2 = Parser<DecimalFractionNumeric>.ParseExpr(r);
-        //    r3 = r2.Evalute();
+            //r = Parser<DecimalFractionNumeric>.CheckValidity2("1+(2/3)");
+            r2 = Parser<DecimalFractionNumeric>.ParseExpr("1+(2/3)");
+            r3 = r2.Evalute();
 
-        //    r = Parser<DecimalFractionNumeric>.CheckValidity2("1+(2/3)-((4*5)-(6^7))");
-        //    r2 = Parser<DecimalFractionNumeric>.ParseExpr(r);
-        //    r3 = r2.Evalute();
+            //r = Parser<DecimalFractionNumeric>.CheckValidity2("1+(2/3)-((4*5)-(6^7))");
+            r2 = Parser<DecimalFractionNumeric>.ParseExpr("1+(2/3)-((4*5)-(6^7))");
+            r3 = r2.Evalute();
 
-        //    r = Parser<DecimalFractionNumeric>.CheckValidity2(" 1+ (2  /3)- ((4 *5)-(6 ^7   )) ");
-        //    r2 = Parser<DecimalFractionNumeric>.ParseExpr(r);
-        //    r3 = r2.Evalute();
+            //r = Parser<DecimalFractionNumeric>.CheckValidity2(" 1+ (2  /3)- ((4 *5)-(6 ^7   )) ");
+            r2 = Parser<DecimalFractionNumeric>.ParseExpr(" 1+ (2  /3)- ((4 *5)-(6 ^7   )) ");
+            r3 = r2.Evalute();
 
-        //    r = Parser<DecimalFractionNumeric>.CheckValidity2("sin(1)");
-        //    r2 = Parser<DecimalFractionNumeric>.ParseExpr(r);
-        //    r3 = r2.Evalute();
+            //r = Parser<DecimalFractionNumeric>.CheckValidity2("sin(1)");
+            r2 = Parser<DecimalFractionNumeric>.ParseExpr("sin(1)");
+            r3 = r2.Evalute();
 
-        //    r = Parser<DecimalFractionNumeric>.CheckValidity2("sin(1) + cos(2)");
-        //    r2 = Parser<DecimalFractionNumeric>.ParseExpr(r);
-        //    r3 = r2.Evalute();
+            //r = Parser<DecimalFractionNumeric>.CheckValidity2("sin(1) + cos(2)");
+            r2 = Parser<DecimalFractionNumeric>.ParseExpr("sin(1) + cos(2)");
+            r3 = r2.Evalute();
 
-        //    r = Parser<DecimalFractionNumeric>.CheckValidity2("sin(-1+2) + cos(2-(3 *4) ) ");
-        //    r2 = Parser<DecimalFractionNumeric>.ParseExpr(r);
-        //    r3 = r2.Evalute();
+            //r = Parser<DecimalFractionNumeric>.CheckValidity2("sin(-1+2) + cos(2-(3 *4) ) ");
+            r2 = Parser<DecimalFractionNumeric>.ParseExpr("sin(-1+2) + cos(2-(3 *4) ) ");
+            r3 = r2.Evalute();
 
-        //    //1.1214279939932775905606310107673884381681241714752190055239491504...
-        //    r = Parser<DecimalFractionNumeric>.CheckValidity2("sin(-1+2) + cos(2-(sin(2^(-1/3))) ) ");
-        //    r2 = Parser<DecimalFractionNumeric>.ParseExpr(r);
-        //    r3 = r2.Evalute();
+            //1.1214279939932775905606310107673884381681241714752190055239491504...
+            //r = Parser<DecimalFractionNumeric>.CheckValidity2("sin(-1+2) + cos(2-(sin(2^(-1/3))) ) ");
+            r2 = Parser<DecimalFractionNumeric>.ParseExpr("sin(-1+2) + cos(2-(sin(2^(-1/3))) ) ");
+            r3 = r2.Evalute();
 
-        //    //Assert.Pass();
-        //}
+            //Assert.Pass();
+        }
 
         [Test]
         public void DecimalFractionNumericTest()
@@ -154,6 +156,12 @@ namespace Tests
 
             r = Parser<DecimalFractionNumeric>.ParseExpr("123 +(89.3*  9.1)* 4.1^5");
             Assert.That<decimal>(r.Evalute(), Is.EqualTo(941605.2461863m));
+
+            r = Parser<DecimalFractionNumeric>.ParseExpr("234.56*23.+123");
+            Assert.That<decimal>(r.Evalute(), Is.EqualTo(5517.88m));
+
+            r = Parser<DecimalFractionNumeric>.ParseExpr("234.56*.23+123");
+            Assert.That<decimal>(r.Evalute(), Is.EqualTo(176.9488m));
         }
     }
 }
