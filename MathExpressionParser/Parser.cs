@@ -29,9 +29,9 @@ namespace MathExpressionParser
             {States.Start, 0 },
             {States.Whitespace, 0},
         };
-        private static Stack<Symbol> _symbols;
+        private static Stack<Token> _tokens;
 
-        public static int? FindFirstLowestPriorityOp2(Symbol[] symbols)
+        public static int? FindFirstLowestPriorityOp2(Token[] symbols)
         {
             int lowestPriority = int.MaxValue;
             int? ret = null;
@@ -61,20 +61,12 @@ namespace MathExpressionParser
             return ret;
         }
 
-        public static (string fnName, string fnParam) GetFunctionParts(string expr)
-        {
-            var leftBracketIdx = expr.IndexOf('(');
-            var fnName = expr.Substring(0, leftBracketIdx);
-            var fnParam = expr.Substring(leftBracketIdx + 1, expr.Length - 2 - leftBracketIdx);
-            return (fnName, fnParam);
-        }
-
         public static Node<T> ParseExpr(string expr)
         {
-            return ParseExpr(CheckValidity(expr));
+            return ParseExpr(GetTokens(expr));
         }
 
-        private static Node<T> ParseExpr(Symbol[] symbols)
+        private static Node<T> ParseExpr(Token[] symbols)
         {
             int? opIdx = FindFirstLowestPriorityOp2(symbols);
             if (opIdx == null)
@@ -105,7 +97,7 @@ namespace MathExpressionParser
                 throw new Exception("Unexpected symbol.");
             }
 
-            Symbol[] left;
+            Token[] left;
             if (opIdx == 0)
             {
                 //T zero = default;
@@ -118,37 +110,21 @@ namespace MathExpressionParser
                 op.Left = ParseExpr(left);
             }
 
-            Symbol[] right = symbols.Skip(opIdx.Value + 1).ToArray();
+            Token[] right = symbols.Skip(opIdx.Value + 1).ToArray();
             op.Right = ParseExpr(right);
 
             return op;
         }
 
-        public static Symbol[] CheckValidity(string expr)
+        public static Token[] GetTokens(string expr)
         {
-            _symbols = new Stack<Symbol>();
+            _tokens = new Stack<Token>();
             Stack<char> bracktets = new();
             States previousState = States.Start;
             States currentState;
             StringBuilder currentFunc = new();
             StringBuilder currentNum = new();
             bool currentHasNumDot = false;
-
-            //previousState = getState(expr[0]);
-            //if (currentState == States.RightBracket)
-            //{
-            //    ThrowBadChar(0);
-            //}
-            //if (currentState == States.Function)
-            //{
-            //    currentFunc.Append(expr[0]);
-            //}
-            //else if (currentState == States.LeftBracket)
-            //{
-            //    bracktets.Push('(');
-            //    symbols.Push(new("("));
-            //}
-            //previousState = currentState;
 
             for (int i = 0; i <= expr.Length; i++)
             {
@@ -184,45 +160,40 @@ namespace MathExpressionParser
                 }
                 else if (currentState == States.Function)
                 {
-                    //symbols.Peek().Text += expr[i];
                     currentFunc.Append(expr[i]);
                 }
-                if (HasSymbolSequenceEnded(previousState, currentState))
+                if (HasTokenEnded(previousState, currentState))
                 {
-                    //if (symbols.Peek() is Operation<T>)
-                    //{
-                    //    if (!functions.Contains(symbols.Peek().Text) && !operators.Contains(symbols.Peek().Text))
-                    //    {
-                    //        throw new Exception($"Unknown function at {symbols.Peek().StartIdx}");
-                    //    }
-                    //}
-
-                    //create new symbol
+                    //create new token
                     if (previousState == States.Digit)
                     {
-                        if (_symbols.TryPeek(out Symbol n) && n is Number<T>)
+                        if (_tokens.TryPeek(out Token n) && n is Number<T>)
                         {
                             ThrowBadChar(i - currentNum.Length);
                         }
                         //T number3 = default;
                         //_ = number3.TryParse(currentNum.ToString(), out number3);
-                        _symbols.Push(new Number<T>(currentNum.ToString(), i - currentNum.Length));
+                        _tokens.Push(new Number<T>(currentNum.ToString(), i - currentNum.Length));
                         currentNum.Clear();
                         currentHasNumDot = false;
                     }
                     else if (previousState == States.Function)
                     {
-                        _symbols.Push(new Operation<T>(currentFunc.ToString(), i - currentFunc.Length));
+                        if (!functions.Contains(currentFunc.ToString()))
+                        {
+                            throw new Exception($"Unknown function '{currentFunc}'");
+                        }
+                        _tokens.Push(new Operation<T>(currentFunc.ToString(), i - currentFunc.Length));
                         currentFunc.Clear();
                     }
                     else if (previousState == States.LeftBracket)
                     {
                         bracktets.Push('(');
-                        _symbols.Push(new Symbol("(", i - 1));
+                        _tokens.Push(new Token("(", i - 1));
                     }
                     else if (previousState == States.Operator)
                     {
-                        _symbols.Push(new Operation<T>(expr[i - 1], i - 1));
+                        _tokens.Push(new Operation<T>(expr[i - 1], i - 1));
                     }
                     else if (previousState == States.RightBracket)
                     {
@@ -231,22 +202,9 @@ namespace MathExpressionParser
                             ThrowBadChar(i);
                         }
                         bracktets.Pop();
-                        _symbols.Push(new Symbol(")", i - 1));
+                        _tokens.Push(new Token(")", i - 1));
                     }
                 }
-                //else
-                //{
-                //    if (currentState == States.Digit)
-                //    {
-                //        //symbols.Peek().Text += expr[i];
-                //        currentNum.Append(expr[i]);
-                //    }
-                //    else if (currentState == States.Function)
-                //    {
-                //        //symbols.Peek().Text += expr[i];
-                //        currentFunc.Append(expr[i]);
-                //    }
-                //}
                 previousState = currentState;
             }
 
@@ -255,7 +213,7 @@ namespace MathExpressionParser
                 throw new Exception("Unexpected end of expression.");
             }
 
-            return _symbols.Reverse().ToArray();
+            return _tokens.Reverse().ToArray();
         }
 
         private static States getState(char ch)
@@ -300,16 +258,8 @@ namespace MathExpressionParser
             return (_wrongStates[prev] & (int)current) == 0;
         }
 
-        private static bool HasSymbolSequenceEnded(States prev, States current)
+        private static bool HasTokenEnded(States prev, States current)
         {
-            //if (prev == States.Digit)
-            //{
-            //    return current == States.Operator || current == States.RightBracket || current == States.Whitespace;
-            //}
-            //if (prev == States.Function)
-            //{
-            //    return current == States.LeftBracket || current == States.Whitespace;
-            //}
             if (prev == States.Start)
             {
                 return false;
@@ -344,26 +294,26 @@ namespace MathExpressionParser
     }
 
     [DebuggerDisplay("{Text}")]
-    public class Symbol
+    public class Token
     {
         public string Text { get; set; }
 
         public ushort StartIdx { get; set; }
 
-        public Symbol(string text, ushort startIdx)
+        public Token(string text, ushort startIdx)
         {
             Text = text;
             StartIdx = startIdx;
         }
 
-        public Symbol(string text, int startIdx)
+        public Token(string text, int startIdx)
         {
             Text = text;
             StartIdx = (ushort)startIdx;
         }
     }
 
-    public abstract class Node<T> : Symbol where T : INumericOps<T>
+    public abstract class Node<T> : Token where T : INumericOps<T>
     {
         public Node(string text, int startIdx) : base(text, startIdx)
         {
