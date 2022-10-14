@@ -7,7 +7,7 @@
             <Grid RowDefinitions="auto, auto" ColumnDefinitions="*">
                 <Entry x:Name="txtDisplay" Text="{Binding Path=Display, Mode=TwoWay}" CursorPosition="{Binding Path=DisplayCaretPos, Mode=TwoWay}"
                        SelectionLength="{Binding Path=DisplaySelectedLength, Mode=TwoWay}" FontFamily="LcdSolid" FontSize="36"
-                       FontAutoScalingEnabled="True" BackgroundColor="{StaticResource LcdDisplay1}" Grid.Row="0" Margin="0" />
+                       FontAutoScalingEnabled="True" BackgroundColor="{StaticResource LcdDisplay1}" Grid.Row="0" Margin="0" Keyboard="Numeric" />
                 <Entry x:Name="txtMassage" Text="{Binding Path=ErrorMsg, Mode=TwoWay}" FontFamily="LcdSolid" 
                        FontSize="12" FontAutoScalingEnabled="True" BackgroundColor="{StaticResource LcdDisplay1}" IsReadOnly="True" Grid.Row="1"
                        Margin="0" />
@@ -34,7 +34,7 @@
             <local:InsertBtn x:Name="btn8" Text="8" Grid.Row="0" Grid.Column="1" />
             <local:InsertBtn x:Name="btn9" Text="9" Grid.Row="0" Grid.Column="2" />
             <Button x:Name="btnEq" Text="=" Grid.Row="0" Grid.Column="3" Command="{Binding Calculate}" />
-            <Button x:Name="btnBackspace" Text="&#9003;" Grid.Row="0" Grid.Column="4" Command="{Binding Backspace}" />
+            <Button x:Name="btnBackspace" Text="&#9003;" Grid.Row="0" Grid.Column="4" Clicked="btnBackspace_Clicked" />
 
             <local:InsertBtn x:Name="btn4" Text="4" Grid.Column="0" Grid.Row="1" />
             <local:InsertBtn x:Name="btn5" Text="5" Grid.Column="1" Grid.Row="1" />

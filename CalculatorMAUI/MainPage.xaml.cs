@@ -24,5 +24,20 @@ namespace CalculatorMAUI
         {
             txtDisplay.Focus();
         }
+
+        private void btnBackspace_Clicked(object sender, EventArgs e)
+        {
+            if (txtDisplay.CursorPosition == 0)
+            {
+                txtDisplay.Focus();
+            }
+            else
+            {
+                int cursorPosition = txtDisplay.CursorPosition;
+                txtDisplay.Text = txtDisplay.Text.Remove(cursorPosition - 1, 1);
+                txtDisplay.Focus();
+                txtDisplay.CursorPosition = cursorPosition - 1;
+            }
+        }
     }
 }
