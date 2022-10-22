@@ -7,13 +7,17 @@
             <Grid RowDefinitions="auto, auto" ColumnDefinitions="*">
                 <Entry x:Name="txtDisplay" Text="{Binding Path=Display, Mode=TwoWay}" CursorPosition="{Binding Path=DisplayCaretPos, Mode=TwoWay}"
                        SelectionLength="{Binding Path=DisplaySelectedLength, Mode=TwoWay}" FontFamily="LcdSolid" FontSize="36"
-                       FontAutoScalingEnabled="True" BackgroundColor="{StaticResource LcdDisplay1}" Grid.Row="0" Margin="0" Keyboard="Numeric" />
+                       FontAutoScalingEnabled="True" BackgroundColor="{StaticResource LcdDisplay1}" Grid.Row="0" Margin="0">
+                    <Entry.Behaviors>
+                        <local:HideSoftInputBehaviour />
+                    </Entry.Behaviors>
+                </Entry>
                 <Entry x:Name="txtMassage" Text="{Binding Path=ErrorMsg, Mode=TwoWay}" FontFamily="LcdSolid" 
                        FontSize="12" FontAutoScalingEnabled="True" BackgroundColor="{StaticResource LcdDisplay1}" IsReadOnly="True" Grid.Row="1"
                        Margin="0" />
             </Grid>
         </Border>
-        
+
         <Grid ColumnSpacing="8" RowSpacing="8" Grid.Row="1" Margin="8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
