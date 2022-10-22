@@ -13,38 +13,12 @@ namespace CalculatorMAUI
             //Android_HideSoftKeyboard();
             calculatorVM = vm;
             BindingContext = calculatorVM;
+#if ANDROID
+            txtDisplay.Behaviors.Add(new HideSoftInputBehavior());
+#endif
             calculatorVM.BtnPressedExecuted += CalculatorVM_BtnPressedExecuted;
-            calculatorVM.BackspaceExecuted += CalculatorVM_BackspaceExecuted;
+            //calculatorVM.BackspaceExecuted += CalculatorVM_BackspaceExecuted;
         }
-
-//        private void Android_HideSoftKeyboard()
-//        {
-//#if ANDROID
-//            var imm = (Android.Views.InputMethods.InputMethodManager)MauiApplication.Current.GetSystemService(Android.Content.Context.InputMethodService);
-
-//            if (imm != null)
-//            {
-//                //this stuff came from here:  https://www.syncfusion.com/kb/12559/how-to-hide-the-keyboard-when-scrolling-in-xamarin-forms-listview-sflistview
-//                Android.App.Activity activity = Platform.CurrentActivity;
-//                Android.OS.IBinder wToken = activity.CurrentFocus?.WindowToken;
-//                imm.HideSoftInputFromWindow(wToken, 0);
-//            }
-
-//            var context = Android.App.Application.Context;
-//            var inputMethodManager = context.GetSystemService(Android.Content.Context.InputMethodService) as Android.Views.InputMethods.InputMethodManager;
-//            if (inputMethodManager != null && context is Android.App.Activity)
-//            {
-//                var activity = context as Android.App.Activity;
-//                var token = activity.CurrentFocus?.WindowToken;
-//                inputMethodManager.HideSoftInputFromWindow(token, Android.Views.InputMethods.HideSoftInputFlags.None);
-//                activity.Window.DecorView.ClearFocus();
-//            }
-
-//            //EntryHandler.Mapper.AppendToMapping("HideSoftKeyboard", (entryhandler, entry) =>
-//            //{
-//            //});
-//#endif
-//        }
 
         private void CalculatorVM_BackspaceExecuted()
         {

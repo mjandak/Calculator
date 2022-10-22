@@ -56,9 +56,6 @@
 	  <Compile Update="InsertBtn.xaml.cs">
 	    <DependentUpon>InsertBtn.xaml</DependentUpon>
 	  </Compile>
-	  <Compile Update="Platforms\Windows\KeyboardHelper2.cs">
-	    <ExcludeFromCurrentConfiguration>false</ExcludeFromCurrentConfiguration>
-	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
