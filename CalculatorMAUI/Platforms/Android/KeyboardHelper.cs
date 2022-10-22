@@ -1,7 +1,6 @@
 ﻿using Android.Content;
 using Android.Runtime;
 using Android.Views.InputMethods;
-using CalculatorMAUI.Platforms.Android;
 using Android.App;
 using System;
 using System.Collections.Generic;
@@ -11,7 +10,7 @@ using System.Threading.Tasks;
 using Application = Android.App.Application;
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: Dependency(typeof(KeyboardHelper))]
+[assembly: Dependency(typeof(CalculatorMAUI.Platforms.Android.KeyboardHelper))]
 namespace CalculatorMAUI.Platforms.Android
 {
     //[Preserve(AllMembers = true)]

@@ -12,13 +12,17 @@ namespace CalculatorMAUI
         {
             entry.Focused += Entry_Focused;
             base.OnAttachedTo(entry);
-
         }
 
         private void Entry_Focused(object sender, FocusEventArgs e)
         {
-            
-            DependencyService.Get<IKeyboardHelper>().HideKeyboard();
+            //var x = DependencyService.Get<IKeyboardHelper>();
+            //x.HideKeyboard();
+            if (e.IsFocused)
+            {
+                KeyboardHelper2 keyboardHelper = new();
+                keyboardHelper.HideSoftInput();
+            }
         }
     }
 }
