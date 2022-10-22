@@ -107,10 +107,8 @@ namespace CalculatorMAUI.ViewModel
             }
             else
             {
-                int newCaretPos = DisplayCaretPos;
-
                 var text = command;
-                newCaretPos = DisplayCaretPos + text.Length;
+                int newCaretPos = DisplayCaretPos + text.Length;
                 Display = Display.Insert(DisplayCaretPos, text);
 
                 DisplayCaretPos = newCaretPos;
