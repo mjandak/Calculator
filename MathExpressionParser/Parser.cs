@@ -30,8 +30,9 @@ namespace MathExpressionParser
             {States.Whitespace, 0},
         };
         private static Stack<Token> _tokens;
+        private static INumbers<T> _numbers;
 
-        public static int? FindFirstLowestPriorityOp2(Token[] symbols)
+        private static int? FindFirstLowestPriorityOp(Token[] symbols)
         {
             int lowestPriority = int.MaxValue;
             int? ret = null;
@@ -61,14 +62,21 @@ namespace MathExpressionParser
             return ret;
         }
 
-        public static Node<T> ParseExpr(string expr)
+        public static Node<T> ParseExpr(string expr, INumbers<T> numbers)
         {
+            if (string.IsNullOrWhiteSpace(expr))
+            {
+                throw new ArgumentException($"'{nameof(expr)}' cannot be null or whitespace.", nameof(expr));
+            }
+
+            _numbers = numbers ?? throw new ArgumentNullException(nameof(numbers));
+
             return ParseExpr(GetTokens(expr));
         }
 
         private static Node<T> ParseExpr(Token[] symbols)
         {
-            int? opIdx = FindFirstLowestPriorityOp2(symbols);
+            int? opIdx = FindFirstLowestPriorityOp(symbols);
             if (opIdx == null)
             {
                 //expr is a single number or expression in brackets or function
@@ -100,8 +108,6 @@ namespace MathExpressionParser
             Token[] left;
             if (opIdx == 0)
             {
-                //T zero = default;
-                //_ = zero.TryParse("0", out zero);
                 op.Left = new Number<T>("0", 0);
             }
             else
@@ -134,7 +140,7 @@ namespace MathExpressionParser
                 }
                 else
                 {
-                    currentState = getState(expr[i]);
+                    currentState = GetState(expr[i]);
                 }
 
                 if (currentState == States.Unknown)
@@ -216,7 +222,7 @@ namespace MathExpressionParser
             return _tokens.Reverse().ToArray();
         }
 
-        private static States getState(char ch)
+        private static States GetState(char ch)
         {
             if (char.IsDigit(ch) || ch == '.')
             {
@@ -291,6 +297,12 @@ namespace MathExpressionParser
             Whitespace = 64,
             End = 128
         }
+    }
+
+    public interface INumbers<T>
+    {
+        public T GetNumber(string number);
+
     }
 
     [DebuggerDisplay("{Text}")]
@@ -445,6 +457,8 @@ namespace MathExpressionParser
         decimal _enumerator;
         decimal _denominator;
 
+        public DecimalFractionNumeric(string value) : this(decimal.Parse(value)) {}
+
         public DecimalFractionNumeric(decimal value)
         {
             IsFraction = false;
@@ -482,16 +496,16 @@ namespace MathExpressionParser
             private set { _denominator = value; }
         }
 
-        public decimal GetResult()
-        {
-            return _enumerator / _denominator;
-        }
+        //public decimal GetResult()
+        //{
+        //    return _enumerator / _denominator;
+        //}
 
-        public void SetFraction(DecimalFractionNumeric enumerator, DecimalFractionNumeric denominator)
-        {
-            Denominator = denominator;
-            Enumerator = enumerator;
-        }
+        //public void SetFraction(DecimalFractionNumeric enumerator, DecimalFractionNumeric denominator)
+        //{
+        //    Denominator = denominator;
+        //    Enumerator = enumerator;
+        //}
 
         public DecimalFractionNumeric Add(DecimalFractionNumeric rvalue)
         {
@@ -604,6 +618,14 @@ namespace MathExpressionParser
         public DecimalFractionNumeric Tan()
         {
             return new DecimalFractionNumeric(ElementaryFunctionsDecimal.Tan(Value));
+        }
+    }
+
+    public class DecimalFractionNumbers : INumbers<DecimalFractionNumeric>
+    {
+        public DecimalFractionNumeric GetNumber(string number)
+        {
+            return new DecimalFractionNumeric(number);
         }
     }
 
