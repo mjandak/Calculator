@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MathExpressionParser
 {
-    public class Parser<T> where T : INumericOps<T>
+    public class Parser<T> where T : INumericOps<T>, INumber
     {
         private static readonly Dictionary<string, int> _priorities = new()
         {
@@ -62,15 +62,12 @@ namespace MathExpressionParser
             return ret;
         }
 
-        public static Node<T> ParseExpr(string expr, INumbers<T> numbers)
+        public static Node<T> ParseExpr(string expr)
         {
             if (string.IsNullOrWhiteSpace(expr))
             {
                 throw new ArgumentException($"'{nameof(expr)}' cannot be null or whitespace.", nameof(expr));
             }
-
-            _numbers = numbers ?? throw new ArgumentNullException(nameof(numbers));
-
             return ParseExpr(GetTokens(expr));
         }
 
@@ -325,7 +322,7 @@ namespace MathExpressionParser
         }
     }
 
-    public abstract class Node<T> : Token where T : INumericOps<T>
+    public abstract class Node<T> : Token where T : INumericOps<T>, INumber
     {
         public Node(string text, int startIdx) : base(text, startIdx)
         {
@@ -336,7 +333,7 @@ namespace MathExpressionParser
         public abstract T Evalute();
     }
 
-    public class Operation<T> : Node<T> where T : INumericOps<T>
+    public class Operation<T> : Node<T> where T : INumericOps<T>, INumber
     {
         private Node<T> _parent;
         private Node<T> _left;
@@ -406,22 +403,25 @@ namespace MathExpressionParser
         }
     }
 
-    public class Number<T> : Node<T> where T : INumericOps<T>
+    public class Number<T> : Node<T> where T : INumericOps<T>, INumber
     {
         public T Value { get; set; }
+
         public override Operation<T> Parent { get; set; }
 
         public Number(string number, int startIdx) : base(number, startIdx)
         {
             T x = default;
-            if (x.TryParse(number, out x))
-            {
-                Value = x;
-            }
-            else
-            {
-                throw new Exception($"Invalid number string '{number}'.");
-            }
+            x.SetValue(number);
+            Value = x;
+            //if (x.TryParse(number, out x))
+            //{
+            //    Value = x;
+            //}
+            //else
+            //{
+            //    throw new Exception($"Invalid number string '{number}'.");
+            //}
         }
 
         public override string ToJson()
@@ -439,7 +439,7 @@ namespace MathExpressionParser
     /// Math operations on an instance of T.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface INumericOps<T>
+    public interface INumericOps<T> where T : INumber
     {
         public T Add(T rvalue);
         public T Subtract(T rvalue);
@@ -449,15 +449,20 @@ namespace MathExpressionParser
         public T Sin();
         public T Cos();
         public T Tan();
-        bool TryParse(string expr, out T number);
+        //bool TryParse(string expr, out T number);
     }
 
-    public struct DecimalFractionNumeric : INumericOps<DecimalFractionNumeric>
+    public interface INumber
+    {
+        public void SetValue(string value);
+    }
+
+    public struct DecimalFractionNumeric : INumericOps<DecimalFractionNumeric>, INumber
     {
         decimal _enumerator;
         decimal _denominator;
 
-        public DecimalFractionNumeric(string value) : this(decimal.Parse(value)) {}
+        public DecimalFractionNumeric(string value) : this(decimal.Parse(value)) { }
 
         public DecimalFractionNumeric(decimal value)
         {
@@ -549,17 +554,17 @@ namespace MathExpressionParser
             return new DecimalFractionNumeric(-1 * _enumerator, _denominator);
         }
 
-        public bool TryParse(string expr, out DecimalFractionNumeric number)
-        {
-            decimal d;
-            if (decimal.TryParse(expr, out d))
-            {
-                number = new DecimalFractionNumeric(d);
-                return true;
-            }
-            number = new DecimalFractionNumeric(d);
-            return false;
-        }
+        //public bool TryParse(string expr, out DecimalFractionNumeric number)
+        //{
+        //    decimal d;
+        //    if (decimal.TryParse(expr, out d))
+        //    {
+        //        number = new DecimalFractionNumeric(d);
+        //        return true;
+        //    }
+        //    number = new DecimalFractionNumeric(d);
+        //    return false;
+        //}
 
         public static implicit operator DecimalFractionNumeric(decimal value)
         {
@@ -619,6 +624,12 @@ namespace MathExpressionParser
         {
             return new DecimalFractionNumeric(ElementaryFunctionsDecimal.Tan(Value));
         }
+
+        public void SetValue(string value)
+        {
+            _denominator = decimal.Parse(value);
+            _enumerator = 0m;
+        }
     }
 
     public class DecimalFractionNumbers : INumbers<DecimalFractionNumeric>
@@ -629,7 +640,7 @@ namespace MathExpressionParser
         }
     }
 
-    public struct DecimalNumneric : INumericOps<DecimalNumneric>
+    public struct DecimalNumneric : INumericOps<DecimalNumneric>, INumber
     {
         private decimal _value;
 
@@ -663,16 +674,16 @@ namespace MathExpressionParser
             return new DecimalNumneric(_value - rvalue._value);
         }
 
-        public bool TryParse(string expr, out DecimalNumneric number)
-        {
-            if (decimal.TryParse(expr, out decimal result))
-            {
-                number = new DecimalNumneric(result);
-                return true;
-            }
-            number = default;
-            return false;
-        }
+        //public bool TryParse(string expr, out DecimalNumneric number)
+        //{
+        //    if (decimal.TryParse(expr, out decimal result))
+        //    {
+        //        number = new DecimalNumneric(result);
+        //        return true;
+        //    }
+        //    number = default;
+        //    return false;
+        //}
 
         public static implicit operator DecimalNumneric(decimal value)
         {
@@ -700,6 +711,11 @@ namespace MathExpressionParser
         }
 
         public DecimalNumneric Tan()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetValue(string value)
         {
             throw new NotImplementedException();
         }
