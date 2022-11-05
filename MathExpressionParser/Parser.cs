@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MathExpressionParser
 {
-    public class Parser<T> where T : INumericOps<T>, INumber
+    public class Parser<T> where T : INumericOps<T>, INumber, new()
     {
         private static readonly Dictionary<string, int> _priorities = new()
         {
@@ -19,7 +19,7 @@ namespace MathExpressionParser
         };
         private static readonly string[] operators = new string[] { "+", "-", "*", "/", "^", };
         private static readonly string[] functions = new string[] { "sin", "cos", "tan", "cot" };
-        private static readonly Dictionary<States, int> _wrongStates = new Dictionary<States, int>()
+        private static readonly Dictionary<States, int> _wrongStates = new()
         {
             {States.Digit, (int)(States.LeftBracket | States.Function) },
             {States.Operator, (int)(States.RightBracket | States.Operator) },
@@ -30,7 +30,6 @@ namespace MathExpressionParser
             {States.Whitespace, 0},
         };
         private static Stack<Token> _tokens;
-        private static INumbers<T> _numbers;
 
         private static int? FindFirstLowestPriorityOp(Token[] symbols)
         {
@@ -296,12 +295,6 @@ namespace MathExpressionParser
         }
     }
 
-    public interface INumbers<T>
-    {
-        public T GetNumber(string number);
-
-    }
-
     [DebuggerDisplay("{Text}")]
     public class Token
     {
@@ -403,7 +396,7 @@ namespace MathExpressionParser
         }
     }
 
-    public class Number<T> : Node<T> where T : INumericOps<T>, INumber
+    public class Number<T> : Node<T> where T : INumericOps<T>, INumber, new()
     {
         public T Value { get; set; }
 
@@ -411,17 +404,9 @@ namespace MathExpressionParser
 
         public Number(string number, int startIdx) : base(number, startIdx)
         {
-            T x = default;
-            x.SetValue(number);
-            Value = x;
-            //if (x.TryParse(number, out x))
-            //{
-            //    Value = x;
-            //}
-            //else
-            //{
-            //    throw new Exception($"Invalid number string '{number}'.");
-            //}
+            T n = new();
+            n.SetValue(number);
+            Value = n;
         }
 
         public override string ToJson()
@@ -457,16 +442,27 @@ namespace MathExpressionParser
         public void SetValue(string value);
     }
 
+    public interface INumbers<T>
+    {
+        public T GetNumber(string number);
+
+    }
+
     public struct DecimalFractionNumeric : INumericOps<DecimalFractionNumeric>, INumber
     {
         decimal _enumerator;
         decimal _denominator;
 
+        public DecimalFractionNumeric()
+        {
+            _enumerator = 0m;
+            _denominator = 1m;
+        }
+
         public DecimalFractionNumeric(string value) : this(decimal.Parse(value)) { }
 
         public DecimalFractionNumeric(decimal value)
         {
-            IsFraction = false;
             _enumerator = value;
             _denominator = 1m;
         }
@@ -474,7 +470,6 @@ namespace MathExpressionParser
         public DecimalFractionNumeric(decimal enumerator, decimal denominator)
         {
             var gcd = Gcd(enumerator, denominator);
-            IsFraction = true;
             _enumerator = enumerator / gcd;
             _denominator = denominator / gcd;
         }
@@ -487,8 +482,6 @@ namespace MathExpressionParser
             }
         }
 
-        public bool IsFraction { get; }
-
         public DecimalFractionNumeric Enumerator
         {
             get { return _enumerator; }
@@ -500,17 +493,6 @@ namespace MathExpressionParser
             get { return _denominator; }
             private set { _denominator = value; }
         }
-
-        //public decimal GetResult()
-        //{
-        //    return _enumerator / _denominator;
-        //}
-
-        //public void SetFraction(DecimalFractionNumeric enumerator, DecimalFractionNumeric denominator)
-        //{
-        //    Denominator = denominator;
-        //    Enumerator = enumerator;
-        //}
 
         public DecimalFractionNumeric Add(DecimalFractionNumeric rvalue)
         {
@@ -553,18 +535,6 @@ namespace MathExpressionParser
         {
             return new DecimalFractionNumeric(-1 * _enumerator, _denominator);
         }
-
-        //public bool TryParse(string expr, out DecimalFractionNumeric number)
-        //{
-        //    decimal d;
-        //    if (decimal.TryParse(expr, out d))
-        //    {
-        //        number = new DecimalFractionNumeric(d);
-        //        return true;
-        //    }
-        //    number = new DecimalFractionNumeric(d);
-        //    return false;
-        //}
 
         public static implicit operator DecimalFractionNumeric(decimal value)
         {
@@ -627,8 +597,8 @@ namespace MathExpressionParser
 
         public void SetValue(string value)
         {
-            _denominator = decimal.Parse(value);
-            _enumerator = 0m;
+            _denominator = 1m;
+            _enumerator = decimal.Parse(value);
         }
     }
 
