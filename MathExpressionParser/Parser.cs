@@ -95,7 +95,6 @@ namespace MathExpressionParser
                 return null;
             }
 
-            //new(symbols[opIdx.Value].Text);
             if (symbols[opIdx.Value] is not Operation<T> op)
             {
                 throw new Exception("Unexpected symbol.");
@@ -173,8 +172,6 @@ namespace MathExpressionParser
                         {
                             ThrowBadChar(i - currentNum.Length);
                         }
-                        //T number3 = default;
-                        //_ = number3.TryParse(currentNum.ToString(), out number3);
                         _tokens.Push(new Number<T>(currentNum.ToString(), i - currentNum.Length));
                         currentNum.Clear();
                         currentHasNumDot = false;
@@ -434,7 +431,6 @@ namespace MathExpressionParser
         public T Sin();
         public T Cos();
         public T Tan();
-        //bool TryParse(string expr, out T number);
     }
 
     public interface INumber
@@ -643,17 +639,6 @@ namespace MathExpressionParser
         {
             return new DecimalNumneric(_value - rvalue._value);
         }
-
-        //public bool TryParse(string expr, out DecimalNumneric number)
-        //{
-        //    if (decimal.TryParse(expr, out decimal result))
-        //    {
-        //        number = new DecimalNumneric(result);
-        //        return true;
-        //    }
-        //    number = default;
-        //    return false;
-        //}
 
         public static implicit operator DecimalNumneric(decimal value)
         {
