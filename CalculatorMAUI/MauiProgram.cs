@@ -1,6 +1,6 @@
 ﻿using CalcularorInterfaces;
 using CalculatorMAUI.ViewModel;
-using MathExpressionParser;
+using MathExpressionProvider;
 
 namespace CalculatorMAUI
 {

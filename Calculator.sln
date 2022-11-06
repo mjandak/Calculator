@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathExpressionParser", "Mat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CalcularorInterfaces", "CalcularorInterfaces\CalcularorInterfaces.csproj", "{753B5559-90C6-4399-A51B-8D5F745DDCE2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{5B531D23-DD06-4C84-821F-2F44E7F47BBC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj", "{5B531D23-DD06-4C84-821F-2F44E7F47BBC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathExpressionProvider", "MathExpressionProvider\MathExpressionProvider.csproj", "{27DDE987-F1C5-4A9D-84C7-CA6DF8280103}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +37,10 @@ Global
 		{5B531D23-DD06-4C84-821F-2F44E7F47BBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B531D23-DD06-4C84-821F-2F44E7F47BBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B531D23-DD06-4C84-821F-2F44E7F47BBC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27DDE987-F1C5-4A9D-84C7-CA6DF8280103}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27DDE987-F1C5-4A9D-84C7-CA6DF8280103}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27DDE987-F1C5-4A9D-84C7-CA6DF8280103}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27DDE987-F1C5-4A9D-84C7-CA6DF8280103}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

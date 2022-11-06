@@ -158,6 +158,9 @@ namespace Tests
 
             r = Parser<DecimalFractionNumeric>.ParseExpr("234.56*.23+123");
             Assert.That<decimal>(r.Evalute(), Is.EqualTo(176.9488m));
+
+            r = Parser<DecimalFractionNumeric>.ParseExpr("1393.565^2");
+            Assert.That<decimal>(r.Evalute(), Is.EqualTo(1942023.409225m));
         }
     }
 }

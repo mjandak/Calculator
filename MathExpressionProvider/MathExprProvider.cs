@@ -1,6 +1,7 @@
 ﻿using CalcularorInterfaces;
+using MathExpressionParser;
 
-namespace MathExpressionParser
+namespace MathExpressionProvider
 {
     public class MathExprProvider : IMathExprProvider
     {
