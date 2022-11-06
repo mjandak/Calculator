@@ -1,11 +1,12 @@
-﻿using System;
+﻿using MathExpressionParser;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MathExpressionParser
+namespace MathExpressionParser_v2
 {
     public class Parser<T> where T : INumericOps<T>, INumber, new()
     {
