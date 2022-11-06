@@ -1,5 +1,4 @@
 using MathExpressionParser;
-using MathExpressionParser_v2;
 using NUnit.Framework;
 
 namespace Tests
@@ -31,11 +30,8 @@ namespace Tests
         }
 
         [Test]
-        public void ParserTest()
+        public void ParseExprTest()
         {
-            Node<DecimalFractionNumeric> r2;
-            DecimalFractionNumeric r3;
-
             var a = Parser<DecimalFractionNumeric>.ParseExpr("1+(2/3)").Evalute();
             var b = Parser<DecimalFractionNumeric>.ParseExpr(" 1  +(  2/ 3)   ").Evalute();
             Assert.That(a, Is.EqualTo(b));
@@ -62,7 +58,7 @@ namespace Tests
         }
 
         [Test]
-        public void DecimalFractionNumericTest()
+        public void ParseExprTest2()
         {
             Node<DecimalFractionNumeric> r;
             DecimalFractionNumeric d;

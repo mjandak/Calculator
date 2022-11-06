@@ -1,4 +1,5 @@
 ﻿using MathExpressionParser;
+using MathExpressionParser.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MathExpressionParser_v2
+namespace MathExpressionParser
 {
     public class Parser<T> where T : INumericOps<T>, INumber, new()
     {
@@ -418,33 +419,6 @@ namespace MathExpressionParser_v2
         }
     }
 
-    /// <summary>
-    /// Math operations on an instance of T.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface INumericOps<T> where T : INumber
-    {
-        public T Add(T rvalue);
-        public T Subtract(T rvalue);
-        public T Multiply(T rvalue);
-        public T Divide(T rvalue);
-        public T Power(T exponent);
-        public T Sin();
-        public T Cos();
-        public T Tan();
-    }
-
-    public interface INumber
-    {
-        public void SetValue(string value);
-    }
-
-    public interface INumbers<T>
-    {
-        public T GetNumber(string number);
-
-    }
-
     public struct DecimalFractionNumeric : INumericOps<DecimalFractionNumeric>, INumber
     {
         decimal _enumerator;
@@ -599,14 +573,6 @@ namespace MathExpressionParser_v2
         }
     }
 
-    public class DecimalFractionNumbers : INumbers<DecimalFractionNumeric>
-    {
-        public DecimalFractionNumeric GetNumber(string number)
-        {
-            return new DecimalFractionNumeric(number);
-        }
-    }
-
     public struct DecimalNumneric : INumericOps<DecimalNumneric>, INumber
     {
         private decimal _value;
@@ -676,4 +642,12 @@ namespace MathExpressionParser_v2
             throw new NotImplementedException();
         }
     }
+
+    //public class DecimalFractionNumbers : INumbers<DecimalFractionNumeric>
+    //{
+    //    public DecimalFractionNumeric GetNumber(string number)
+    //    {
+    //        return new DecimalFractionNumeric(number);
+    //    }
+    //}
 }
