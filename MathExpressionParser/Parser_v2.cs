@@ -1,43 +1,56 @@
-﻿using System;
+﻿using MathExpressionParser;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MathExpressionParser
+namespace MathExpressionParser_v2
 {
-    public class Parser<T> where T : INumericOps<T>
+    public class Parser<T> where T : INumericOps<T>, INumber, new()
     {
-        private static Dictionary<char, int> _priorities = new Dictionary<char, int>
+        private static readonly Dictionary<string, int> _priorities = new()
         {
-            {'+', 1},
-            {'-', 1},
-            {'*', 2},
-            {'/', 3}, //divide first to try to avoid OverflowException
-            {'^', 4},
+            {"+", 1},
+            {"-", 1},
+            {"*", 2},
+            {"/", 3}, //divide first to try to avoid OverflowException
+            {"^", 4},
         };
-        private static char[] operators;
+        private static readonly string[] operators = new string[] { "+", "-", "*", "/", "^", };
+        private static readonly string[] functions = new string[] { "sin", "cos", "tan", "cot" };
+        private static readonly Dictionary<States, int> _wrongStates = new()
+        {
+            {States.Digit, (int)(States.LeftBracket | States.Function) },
+            {States.Operator, (int)(States.RightBracket | States.Operator) },
+            {States.LeftBracket, 0},
+            {States.RightBracket, (int)(States.Function | States.LeftBracket) },
+            {States.Function, (int)(States.Digit | States.Operator | States.RightBracket) },
+            {States.Start, 0 },
+            {States.Whitespace, 0},
+        };
+        private static Stack<Token> _tokens;
 
-        public static int? FindFirstLowestPriorityOp(string expr)
+        private static int? FindFirstLowestPriorityOp(Token[] symbols)
         {
             int lowestPriority = int.MaxValue;
             int? ret = null;
             ushort bracketsCount = 0;
-            for (int i = expr.Length - 1; i > -1; i--)
+            for (int i = symbols.Length - 1; i > -1; i--)
             {
-                if (expr[i] == ')')
+                if (symbols[i].Text == ")")
                 {
                     bracketsCount++;
                     continue;
                 }
-                else if (expr[i] == '(')
+                else if (symbols[i].Text == "(")
                 {
                     bracketsCount--;
                     continue;
                 }
                 if (bracketsCount > 0) continue;
-                if (_priorities.TryGetValue(expr[i], out int priority))
+                if (_priorities.TryGetValue(symbols[i].Text, out int priority))
                 {
                     if (priority < lowestPriority)
                     {
@@ -49,206 +62,173 @@ namespace MathExpressionParser
             return ret;
         }
 
-        public static (string fnName, string fnParam) GetFunctionParts(string expr)
-        {
-            var leftBracketIdx = expr.IndexOf('(');
-            var fnName = expr.Substring(0, leftBracketIdx);
-            var fnParam = expr.Substring(leftBracketIdx + 1, expr.Length - 2 - leftBracketIdx);
-            return (fnName, fnParam);
-        }
-
         public static Node<T> ParseExpr(string expr)
         {
-            CheckValidity(expr);
-            return ParseExpr(expr, 0);
+            if (string.IsNullOrWhiteSpace(expr))
+            {
+                throw new ArgumentException($"'{nameof(expr)}' cannot be null or whitespace.", nameof(expr));
+            }
+            return ParseExpr(GetTokens(expr));
         }
 
-        public static Node<T> ParseExpr(string expr, int globalIdx)
+        private static Node<T> ParseExpr(Token[] symbols)
         {
-            int? opIdx = FindFirstLowestPriorityOp(expr);
-
+            int? opIdx = FindFirstLowestPriorityOp(symbols);
             if (opIdx == null)
             {
                 //expr is a single number or expression in brackets or function
-                int firstSymIdx = skip(expr);
-                int lastSymIdx = skipLast(expr);
-                if (expr[firstSymIdx] == '(')
-                {
-                    //expression in brackets
-                    return ParseExpr(
-                        expr.Substring(firstSymIdx + 1, (lastSymIdx - 1) - (firstSymIdx + 1) + 1),
-                        globalIdx + firstSymIdx + 1);
-                }
-                else if (char.IsDigit(expr[firstSymIdx]))
+                if (symbols.First() is Number<T> number)
                 {
                     //number
-                    T number3 = default(T);
-                    number3.TryParse(expr, out number3);
-                    return new Number<T>(number3);
+                    return number;
                 }
-                else
+                if (symbols.First().Text == "(")
+                {
+                    //sub-expression
+                    return ParseExpr(symbols.Skip(1).Take(symbols.Length - 2).ToArray());
+                }
+                if (symbols.First() is Operation<T> fn)
                 {
                     //function
-                    var (fnName, fnParam) = GetFunctionParts(expr);
-                    var fn = new Operation<T>(fnName);
-                    fn.Left = ParseExpr(fnParam);
+                    fn.Left = ParseExpr(symbols.Skip(1).ToArray());
                     return fn;
                 }
+                return null;
             }
 
-            string left = expr.Substring(0, opIdx.Value);
-            string right = expr.Substring(opIdx.Value + 1, expr.Length - 1 - opIdx.Value);
+            if (symbols[opIdx.Value] is not Operation<T> op)
+            {
+                throw new Exception("Unexpected symbol.");
+            }
 
-            var op = new Operation<T>(expr[opIdx.Value]);
-            op.Left = ParseExpr(left, globalIdx);
-            op.Right = ParseExpr(right, globalIdx + opIdx.Value + 1);
+            Token[] left;
+            if (opIdx == 0)
+            {
+                op.Left = new Number<T>("0", 0);
+            }
+            else
+            {
+                left = symbols.Take(opIdx.Value).ToArray();
+                op.Left = ParseExpr(left);
+            }
+
+            Token[] right = symbols.Skip(opIdx.Value + 1).ToArray();
+            op.Right = ParseExpr(right);
 
             return op;
         }
 
-        private static int skip(string s)
+        public static Token[] GetTokens(string expr)
         {
-            for (int i = 0; i < s.Length; i++)
-            {
-                if (!char.IsWhiteSpace(s[i]))
-                {
-                    return i;
-                }
-            }
-            return -1;
-        }
-
-        private static int skipLast(string s)
-        {
-            for (int i = s.Length - 1; i > -1; i--)
-            {
-                if (!char.IsWhiteSpace(s[i]))
-                {
-                    return i;
-                }
-            }
-            return -1;
-        }
-
-        public static void CheckValidity(string expr)
-        {
-            //if (string.IsNull(expr))
-            //{
-            //    throw new InvalidOperationException();
-            //}
-            Stack<char> bracktets = new Stack<char>();
+            _tokens = new Stack<Token>();
+            Stack<char> bracktets = new();
             States previousState = States.Start;
-            operators = new char[] { '+', '-', '*', '/', '^', };
-            string[] functions = new string[] { "sin", "cos", "tan", "cot" };
+            States currentState;
             StringBuilder currentFunc = new();
+            StringBuilder currentNum = new();
+            bool currentHasNumDot = false;
 
-            States currentState = getState(expr[0]);
-            if (currentState == States.Operator || currentState == States.RightBracket)
+            for (int i = 0; i <= expr.Length; i++)
             {
-                ThrowBadChar(0);
-            }
-            if (currentState == States.Function)
-            {
-                currentFunc.Append(expr[0]);
-            }
-            else if (currentState == States.LeftBracket)
-            {
-                bracktets.Push('(');
-            }
-
-            for (int i = 1; i < expr.Length; i++)
-            {
-                if (char.IsWhiteSpace(expr[i]))
+                if (i == expr.Length)
                 {
-                    continue;
+                    currentState = States.End;
+                }
+                else
+                {
+                    currentState = GetState(expr[i]);
                 }
 
-                currentState = getState(expr[i]);
-
-                if (currentState == States.RightBracket)
+                if (currentState == States.Unknown)
                 {
-                    if (bracktets.Peek() != '(' || bracktets.Count == 0)
-                    {
-                        throw new Exception($"Unexpected character at {i}.");
-                    }
-                    else
-                    {
-                        bracktets.Pop();
-                    }
+                    ThrowBadChar(i);
                 }
-                else if (currentState == States.LeftBracket)
+                if (!IsStateAllowed(previousState, currentState))
                 {
-                    bracktets.Push('(');
+                    ThrowBadChar(i);
+                }
+                if (currentState == States.Digit)
+                {
+                    //symbols.Peek().Text += expr[i];
+                    currentNum.Append(expr[i]);
+                    if (expr[i] == '.')
+                    {
+                        if (currentHasNumDot)
+                        {
+                            ThrowBadChar(i);
+                        }
+                        else { currentHasNumDot = true; }
+                    }
                 }
                 else if (currentState == States.Function)
                 {
                     currentFunc.Append(expr[i]);
                 }
-
-                if (currentState == States.LeftBracket && previousState == States.Function)
+                if (HasTokenEnded(previousState, currentState))
                 {
-                    var currentFuncText = currentFunc.ToString();
-                    if (!functions.Contains(currentFuncText))
+                    //create new token
+                    if (previousState == States.Digit)
                     {
-                        throw new Exception($"Unknown function: {currentFuncText} at {i - currentFuncText.Length}");
+                        if (_tokens.TryPeek(out Token n) && n is Number<T>)
+                        {
+                            ThrowBadChar(i - currentNum.Length);
+                        }
+                        _tokens.Push(new Number<T>(currentNum.ToString(), i - currentNum.Length));
+                        currentNum.Clear();
+                        currentHasNumDot = false;
                     }
-                    currentFunc.Clear();
-                }
-
-                if (previousState == States.Digit)
-                {
-                    if (currentState == States.LeftBracket || currentState == States.Function)
+                    else if (previousState == States.Function)
                     {
-                        ThrowBadChar(i);
+                        if (!functions.Contains(currentFunc.ToString()))
+                        {
+                            throw new Exception($"Unknown function '{currentFunc}'");
+                        }
+                        _tokens.Push(new Operation<T>(currentFunc.ToString(), i - currentFunc.Length));
+                        currentFunc.Clear();
                     }
-                }
-                if (previousState == States.LeftBracket)
-                {
-                    if (currentState == States.Operator || currentState == States.RightBracket)
+                    else if (previousState == States.LeftBracket)
                     {
-                        ThrowBadChar(i);
+                        bracktets.Push('(');
+                        _tokens.Push(new Token("(", i - 1));
                     }
-                }
-                if (previousState == States.RightBracket)
-                {
-                    if (currentState == States.Digit || currentState == States.Function)
+                    else if (previousState == States.Operator)
                     {
-                        ThrowBadChar(i);
+                        _tokens.Push(new Operation<T>(expr[i - 1], i - 1));
                     }
-                }
-                if (previousState == States.Operator)
-                {
-                    if (currentState == States.Operator || currentState == States.RightBracket)
+                    else if (previousState == States.RightBracket)
                     {
-                        ThrowBadChar(i);
-                    }
-                }
-                if (previousState == States.Function)
-                {
-                    if (currentState == States.Digit || currentState == States.RightBracket)
-                    {
-                        ThrowBadChar(i);
+                        if (bracktets.Count < 1)
+                        {
+                            ThrowBadChar(i);
+                        }
+                        bracktets.Pop();
+                        _tokens.Push(new Token(")", i - 1));
                     }
                 }
-
                 previousState = currentState;
             }
 
-            if (previousState == States.Function || previousState == States.LeftBracket || previousState == States.Operator)
+            if (bracktets.Count != 0)
             {
                 throw new Exception("Unexpected end of expression.");
             }
-            if (bracktets.Count > 0)
-            {
-                throw new Exception("Unexpected end of expression.");
-            }
+
+            return _tokens.Reverse().ToArray();
         }
 
-        private static States getState(char ch)
+        private static States GetState(char ch)
         {
-            if (char.IsDigit(ch))
+            if (char.IsDigit(ch) || ch == '.')
             {
                 return States.Digit;
+            }
+            else if (char.IsLetter(ch))
+            {
+                return States.Function;
+            }
+            else if (char.IsWhiteSpace(ch))
+            {
+                return States.Whitespace;
             }
             else if (ch == '(')
             {
@@ -258,13 +238,9 @@ namespace MathExpressionParser
             {
                 return States.RightBracket;
             }
-            else if (operators.Contains(ch))
+            else if (operators.Contains(ch.ToString()))
             {
                 return States.Operator;
-            }
-            else if (char.IsLetter(ch))
-            {
-                return States.Function;
             }
             else
             {
@@ -277,41 +253,89 @@ namespace MathExpressionParser
             throw new Exception($"Unexpected character at {i}.");
         }
 
+        private static bool IsStateAllowed(States prev, States current)
+        {
+            return (_wrongStates[prev] & (int)current) == 0;
+        }
+
+        private static bool HasTokenEnded(States prev, States current)
+        {
+            if (prev == States.Start)
+            {
+                return false;
+            }
+            if (prev == States.LeftBracket && current == States.LeftBracket)
+            {
+                return true;
+            }
+            if (prev == States.RightBracket && current == States.RightBracket)
+            {
+                return true;
+            }
+            if (prev == States.Whitespace)
+            {
+                return false;
+            }
+            return prev != current;
+        }
+
         enum States
         {
-            Start,
-            Digit,
-            Operator,
-            LeftBracket,
-            RightBracket,
-            Function,
-            Unknown
+            Start = 0,
+            Digit = 1,
+            Operator = 2,
+            LeftBracket = 4,
+            RightBracket = 8,
+            Function = 16,
+            Unknown = 32,
+            Whitespace = 64,
+            End = 128
         }
     }
 
-    public abstract class Node<T> where T : INumericOps<T>
+    [DebuggerDisplay("{Text}")]
+    public class Token
     {
+        public string Text { get; set; }
+
+        public ushort StartIdx { get; set; }
+
+        public Token(string text, ushort startIdx)
+        {
+            Text = text;
+            StartIdx = startIdx;
+        }
+
+        public Token(string text, int startIdx)
+        {
+            Text = text;
+            StartIdx = (ushort)startIdx;
+        }
+    }
+
+    public abstract class Node<T> : Token where T : INumericOps<T>, INumber
+    {
+        public Node(string text, int startIdx) : base(text, startIdx)
+        {
+
+        }
         public abstract Operation<T> Parent { get; set; }
         public abstract string ToJson();
-
         public abstract T Evalute();
     }
 
-    [DebuggerDisplay("{Symbol}")]
-    public class Operation<T> : Node<T> where T : INumericOps<T>
+    public class Operation<T> : Node<T> where T : INumericOps<T>, INumber
     {
         private Node<T> _parent;
         private Node<T> _left;
         private Node<T> _right;
 
-        public Operation(string symbol)
+        public Operation(string symbol, int startIdx) : base(symbol, startIdx)
         {
-            Symbol = symbol;
         }
 
-        public Operation(char symbol)
+        public Operation(char symbol, int startIdx) : base(symbol.ToString(), startIdx)
         {
-            Symbol = symbol.ToString();
         }
 
         public Node<T> Left
@@ -334,18 +358,16 @@ namespace MathExpressionParser
             }
         }
 
-        public string Symbol { get; set; }
-
         public override Operation<T> Parent { get; set; }
 
         public override string ToJson()
         {
-            return $"{{Symbol:\"{Symbol}\", Left:{Left.ToJson()}, Right:{Right.ToJson()}}}";
+            return $"{{Symbol:\"{Text}\", Left:{Left.ToJson()}, Right:{Right.ToJson()}}}";
         }
 
         public override T Evalute()
         {
-            switch (Symbol)
+            switch (Text)
             {
                 case "+":
                     return Left.Evalute().Add(Right.Evalute());
@@ -367,20 +389,22 @@ namespace MathExpressionParser
                     //return 1 / Math.Tan(Left.Evalute());
                     throw new NotImplementedException();
                 default:
-                    throw new Exception($"Unknown operation: {Symbol}");
+                    throw new Exception($"Unknown operation: {Text}");
             }
         }
     }
 
-    [DebuggerDisplay("{Value}")]
-    public class Number<T> : Node<T> where T : INumericOps<T>
+    public class Number<T> : Node<T> where T : INumericOps<T>, INumber, new()
     {
         public T Value { get; set; }
+
         public override Operation<T> Parent { get; set; }
 
-        public Number(T number)
+        public Number(string number, int startIdx) : base(number, startIdx)
         {
-            Value = number;
+            T n = new();
+            n.SetValue(number);
+            Value = n;
         }
 
         public override string ToJson()
@@ -398,7 +422,7 @@ namespace MathExpressionParser
     /// Math operations on an instance of T.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface INumericOps<T>
+    public interface INumericOps<T> where T : INumber
     {
         public T Add(T rvalue);
         public T Subtract(T rvalue);
@@ -408,17 +432,34 @@ namespace MathExpressionParser
         public T Sin();
         public T Cos();
         public T Tan();
-        bool TryParse(string expr, out T number);
     }
 
-    public struct DecimalFractionNumeric : INumericOps<DecimalFractionNumeric>
+    public interface INumber
+    {
+        public void SetValue(string value);
+    }
+
+    public interface INumbers<T>
+    {
+        public T GetNumber(string number);
+
+    }
+
+    public struct DecimalFractionNumeric : INumericOps<DecimalFractionNumeric>, INumber
     {
         decimal _enumerator;
         decimal _denominator;
 
+        public DecimalFractionNumeric()
+        {
+            _enumerator = 0m;
+            _denominator = 1m;
+        }
+
+        public DecimalFractionNumeric(string value) : this(decimal.Parse(value)) { }
+
         public DecimalFractionNumeric(decimal value)
         {
-            IsFraction = false;
             _enumerator = value;
             _denominator = 1m;
         }
@@ -426,7 +467,6 @@ namespace MathExpressionParser
         public DecimalFractionNumeric(decimal enumerator, decimal denominator)
         {
             var gcd = Gcd(enumerator, denominator);
-            IsFraction = true;
             _enumerator = enumerator / gcd;
             _denominator = denominator / gcd;
         }
@@ -439,8 +479,6 @@ namespace MathExpressionParser
             }
         }
 
-        public bool IsFraction { get; }
-
         public DecimalFractionNumeric Enumerator
         {
             get { return _enumerator; }
@@ -451,17 +489,6 @@ namespace MathExpressionParser
         {
             get { return _denominator; }
             private set { _denominator = value; }
-        }
-
-        public decimal GetResult()
-        {
-            return _enumerator / _denominator;
-        }
-
-        public void SetFraction(DecimalFractionNumeric enumerator, DecimalFractionNumeric denominator)
-        {
-            Denominator = denominator;
-            Enumerator = enumerator;
         }
 
         public DecimalFractionNumeric Add(DecimalFractionNumeric rvalue)
@@ -504,18 +531,6 @@ namespace MathExpressionParser
         public DecimalFractionNumeric Negate()
         {
             return new DecimalFractionNumeric(-1 * _enumerator, _denominator);
-        }
-
-        public bool TryParse(string expr, out DecimalFractionNumeric number)
-        {
-            decimal d;
-            if (decimal.TryParse(expr, out d))
-            {
-                number = new DecimalFractionNumeric(d);
-                return true;
-            }
-            number = new DecimalFractionNumeric(d);
-            return false;
         }
 
         public static implicit operator DecimalFractionNumeric(decimal value)
@@ -576,9 +591,23 @@ namespace MathExpressionParser
         {
             return new DecimalFractionNumeric(ElementaryFunctionsDecimal.Tan(Value));
         }
+
+        public void SetValue(string value)
+        {
+            _denominator = 1m;
+            _enumerator = decimal.Parse(value);
+        }
     }
 
-    public struct DecimalNumneric : INumericOps<DecimalNumneric>
+    public class DecimalFractionNumbers : INumbers<DecimalFractionNumeric>
+    {
+        public DecimalFractionNumeric GetNumber(string number)
+        {
+            return new DecimalFractionNumeric(number);
+        }
+    }
+
+    public struct DecimalNumneric : INumericOps<DecimalNumneric>, INumber
     {
         private decimal _value;
 
@@ -612,17 +641,6 @@ namespace MathExpressionParser
             return new DecimalNumneric(_value - rvalue._value);
         }
 
-        public bool TryParse(string expr, out DecimalNumneric number)
-        {
-            if (decimal.TryParse(expr, out decimal result))
-            {
-                number = new DecimalNumneric(result);
-                return true;
-            }
-            number = default;
-            return false;
-        }
-
         public static implicit operator DecimalNumneric(decimal value)
         {
             return new DecimalNumneric(value);
@@ -649,6 +667,11 @@ namespace MathExpressionParser
         }
 
         public DecimalNumneric Tan()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetValue(string value)
         {
             throw new NotImplementedException();
         }
