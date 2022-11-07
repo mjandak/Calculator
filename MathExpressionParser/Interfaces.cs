@@ -20,6 +20,7 @@ namespace MathExpressionParser.Interfaces
         public T Sin();
         public T Cos();
         public T Tan();
+        public T Log();
     }
 
     public interface INumber

@@ -26,7 +26,7 @@ namespace MathExpressionParser
         public const decimal PI_HALF = 1.5707963267948966192313216916397514420985846996875529104874722961m;
         public const decimal PI_QUARTER = 0.7853981633974483096156608458198757210492923498437764552437361480m;
 
-        public static decimal Log_reduced(decimal x)
+        public static decimal Ln_reduced(decimal x)
         {
             //ln(a*2^n) = ln(a) + n*ln(2)
             int n = 0;
@@ -45,11 +45,16 @@ namespace MathExpressionParser
             x /= 2;
             n += 1;
 
-            return Log(x) + n * 0.69314718055994530941723212145818m;
+            return Ln(x) + n * 0.69314718055994530941723212145818m;
         }
 
-        public static decimal Log(decimal x)
+        public static decimal Ln(decimal x)
         {
+            if (x <= 0)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
             //ln(x) = 2*(((x-1)/(x+1)) + (1/3)*((x-1)/(x+1))^3 + (1/5)*((x-1)/(x+1))^5 + ...)
 
             const decimal numOfTerms = 40;
@@ -66,6 +71,12 @@ namespace MathExpressionParser
             }
 
             return 2m * result;
+        }
+
+        public static decimal Log10(decimal x)
+        {
+            //log(x) = ln(x) * log(e)
+            return Ln_reduced(x) * 0.4342944819032518276511289189166050822943970058036665661144537831m;
         }
 
         public static decimal exp_taylor(decimal x)
@@ -178,7 +189,7 @@ namespace MathExpressionParser
             }
             else
             {
-                decimal a_r = exp_taylor(r * Log_reduced(a));
+                decimal a_r = exp_taylor(r * Ln_reduced(a));
                 return a_q * a_r;
             }
         }
