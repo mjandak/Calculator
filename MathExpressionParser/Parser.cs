@@ -20,7 +20,7 @@ namespace MathExpressionParser
             {"^", 4},
         };
         private static readonly string[] operators = new string[] { "+", "-", "*", "/", "^", };
-        private static readonly string[] functions = new string[] { "sin", "cos", "tan", "cot", "log" };
+        private static readonly string[] functions = new string[] { "sin", "cos", "tan", "cot", "log10", "ln" };
         private static readonly Dictionary<States, int> _wrongStates = new()
         {
             {States.Digit, (int)(States.LeftBracket | States.Function) },
@@ -389,8 +389,10 @@ namespace MathExpressionParser
                 case "cot":
                     //return 1 / Math.Tan(Left.Evalute());
                     throw new NotImplementedException();
-                case "log":
-                    return Left.Evalute().Log();
+                case "log10":
+                    return Left.Evalute().Log10();
+                case "ln":
+                    return Left.Evalute().Ln();
                 default:
                     throw new Exception($"Unknown operation: {Text}");
             }
@@ -574,9 +576,14 @@ namespace MathExpressionParser
             _enumerator = decimal.Parse(value);
         }
 
-        public DecimalFractionNumeric Log()
+        public DecimalFractionNumeric Log10()
         {
             return new DecimalFractionNumeric(ElementaryFunctionsDecimal.Log10(Value));
+        }
+
+        public DecimalFractionNumeric Ln()
+        {
+            return new DecimalFractionNumeric(ElementaryFunctionsDecimal.Ln(Value));
         }
     }
 
@@ -649,7 +656,12 @@ namespace MathExpressionParser
             throw new NotImplementedException();
         }
 
-        public DecimalNumneric Log()
+        public DecimalNumneric Log10()
+        {
+            throw new NotImplementedException();
+        }
+
+        public DecimalNumneric Ln()
         {
             throw new NotImplementedException();
         }

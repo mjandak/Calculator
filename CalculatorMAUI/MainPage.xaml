@@ -62,7 +62,8 @@
             <local:InsertBtn x:Name="btnCot" Text="cot" Grid.Column="3" Grid.Row="4" CommandParameter="cot(" />
             <local:InsertBtn x:Name="btnPi" Text="pi" Grid.Column="4" Grid.Row="4"  CommandParameter="3.1415926535897932384626433833"/>
             
-            <local:InsertBtn x:Name="btnLog" Text="log" Grid.Column="0" Grid.Row="5"  CommandParameter="log("/>
+            <local:InsertBtn x:Name="btnLn" Text="ln" Grid.Column="0" Grid.Row="5"  CommandParameter="ln("/>
+            <local:InsertBtn x:Name="btnLog10" Text="log10" Grid.Column="1" Grid.Row="5"  CommandParameter="log10("/>
         </Grid>
     </Grid>
 
