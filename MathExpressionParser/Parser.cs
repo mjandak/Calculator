@@ -21,15 +21,15 @@ namespace MathExpressionParser
         };
         private static readonly string[] operators = new string[] { "+", "-", "*", "/", "^", };
         private static readonly string[] functions = new string[] { "sin", "cos", "tan", "cot", "log10", "ln" };
-        private static readonly Dictionary<States, int> _wrongStates = new()
+        private static readonly Dictionary<CharStates, int> _wrongStates = new()
         {
-            {States.Digit, (int)(States.LeftBracket | States.Function) },
-            {States.Operator, (int)(States.RightBracket | States.Operator) },
-            {States.LeftBracket, 0},
-            {States.RightBracket, (int)(States.Function | States.LeftBracket) },
-            {States.Function, (int)(States.Digit | States.Operator | States.RightBracket) },
-            {States.Start, 0 },
-            {States.Whitespace, 0},
+            {CharStates.Digit, (int)(CharStates.LeftBracket | CharStates.Function) },
+            {CharStates.Operator, (int)(CharStates.RightBracket | CharStates.Operator) },
+            {CharStates.LeftBracket, 0},
+            {CharStates.RightBracket, (int)(CharStates.Function | CharStates.LeftBracket) },
+            {CharStates.Function, (int)(CharStates.Digit | CharStates.Operator | CharStates.RightBracket) },
+            {CharStates.Start, 0 },
+            {CharStates.Whitespace, 0},
         };
         private static Stack<Token> _tokens;
 
@@ -123,24 +123,25 @@ namespace MathExpressionParser
         {
             _tokens = new Stack<Token>();
             Stack<char> bracktets = new();
-            States previousState = States.Start;
-            States currentState;
+            CharStates previousState = CharStates.Start;
+            CharStates currentState;
             StringBuilder currentFunc = new();
             StringBuilder currentNum = new();
+            StringBuilder currentNumOrFunc = new();
             bool currentHasNumDot = false;
 
             for (int i = 0; i <= expr.Length; i++)
             {
                 if (i == expr.Length)
                 {
-                    currentState = States.End;
+                    currentState = CharStates.End;
                 }
                 else
                 {
                     currentState = GetState(expr[i]);
                 }
 
-                if (currentState == States.Unknown)
+                if (currentState == CharStates.Unknown)
                 {
                     ThrowBadChar(i);
                 }
@@ -148,10 +149,10 @@ namespace MathExpressionParser
                 {
                     ThrowBadChar(i);
                 }
-                if (currentState == States.Digit)
+                if (currentState == CharStates.Digit)
                 {
-                    //symbols.Peek().Text += expr[i];
-                    currentNum.Append(expr[i]);
+                    //currentNum.Append(expr[i]);
+                    currentNumOrFunc.Append(expr[i]);
                     if (expr[i] == '.')
                     {
                         if (currentHasNumDot)
@@ -161,14 +162,15 @@ namespace MathExpressionParser
                         else { currentHasNumDot = true; }
                     }
                 }
-                else if (currentState == States.Function)
+                else if (currentState == CharStates.Function)
                 {
-                    currentFunc.Append(expr[i]);
+                    //currentFunc.Append(expr[i]);
+                    currentNumOrFunc.Append(expr[i]);
                 }
-                if (HasTokenEnded(previousState, currentState))
+                if (TokenHasEnded(previousState, currentState))
                 {
                     //create new token
-                    if (previousState == States.Digit)
+                    if (previousState == CharStates.Digit)
                     {
                         if (_tokens.TryPeek(out Token n) && n is Number<T>)
                         {
@@ -178,7 +180,7 @@ namespace MathExpressionParser
                         currentNum.Clear();
                         currentHasNumDot = false;
                     }
-                    else if (previousState == States.Function)
+                    else if (previousState == CharStates.Function)
                     {
                         if (!functions.Contains(currentFunc.ToString()))
                         {
@@ -187,16 +189,25 @@ namespace MathExpressionParser
                         _tokens.Push(new Operation<T>(currentFunc.ToString(), i - currentFunc.Length));
                         currentFunc.Clear();
                     }
-                    else if (previousState == States.LeftBracket)
+                    else if (previousState == CharStates.Digit || previousState == CharStates.Function)
                     {
+
+                    }
+                    else if (previousState == CharStates.LeftBracket)
+                    {
+                        if (!functions.Contains(currentNumOrFunc.ToString()))
+                        {
+                            throw new Exception($"Unknown function '{currentFunc}'");
+                        }
+
                         bracktets.Push('(');
                         _tokens.Push(new Token("(", i - 1));
                     }
-                    else if (previousState == States.Operator)
+                    else if (previousState == CharStates.Operator)
                     {
                         _tokens.Push(new Operation<T>(expr[i - 1], i - 1));
                     }
-                    else if (previousState == States.RightBracket)
+                    else if (previousState == CharStates.RightBracket)
                     {
                         if (bracktets.Count < 1)
                         {
@@ -217,35 +228,35 @@ namespace MathExpressionParser
             return _tokens.Reverse().ToArray();
         }
 
-        private static States GetState(char ch)
+        private static CharStates GetState(char ch)
         {
             if (char.IsDigit(ch) || ch == '.')
             {
-                return States.Digit;
+                return CharStates.Digit;
             }
             else if (char.IsLetter(ch))
             {
-                return States.Function;
+                return CharStates.Function;
             }
             else if (char.IsWhiteSpace(ch))
             {
-                return States.Whitespace;
+                return CharStates.Whitespace;
             }
             else if (ch == '(')
             {
-                return States.LeftBracket;
+                return CharStates.LeftBracket;
             }
             else if (ch == ')')
             {
-                return States.RightBracket;
+                return CharStates.RightBracket;
             }
             else if (operators.Contains(ch.ToString()))
             {
-                return States.Operator;
+                return CharStates.Operator;
             }
             else
             {
-                return States.Unknown;
+                return CharStates.Unknown;
             }
         }
 
@@ -254,33 +265,33 @@ namespace MathExpressionParser
             throw new Exception($"Unexpected character at {i}.");
         }
 
-        private static bool IsStateAllowed(States prev, States current)
+        private static bool IsStateAllowed(CharStates prev, CharStates current)
         {
             return (_wrongStates[prev] & (int)current) == 0;
         }
 
-        private static bool HasTokenEnded(States prev, States current)
+        private static bool TokenHasEnded(CharStates prev, CharStates current)
         {
-            if (prev == States.Start)
+            if (prev == CharStates.Start)
             {
                 return false;
             }
-            if (prev == States.LeftBracket && current == States.LeftBracket)
+            if (prev == CharStates.LeftBracket && current == CharStates.LeftBracket)
             {
                 return true;
             }
-            if (prev == States.RightBracket && current == States.RightBracket)
+            if (prev == CharStates.RightBracket && current == CharStates.RightBracket)
             {
                 return true;
             }
-            if (prev == States.Whitespace)
+            if (prev == CharStates.Whitespace)
             {
                 return false;
             }
             return prev != current;
         }
 
-        enum States
+        enum CharStates
         {
             Start = 0,
             Digit = 1,
