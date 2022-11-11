@@ -23,11 +23,11 @@ namespace MathExpressionParser
         private static readonly string[] functions = new string[] { "sin", "cos", "tan", "cot", "log10", "ln" };
         private static readonly Dictionary<CharStates, int> _wrongStates = new()
         {
-            {CharStates.Digit, (int)(CharStates.LeftBracket | CharStates.Function) },
+            {CharStates.Digit, 0 /*(int)(CharStates.LeftBracket | CharStates.Function)*/ },
             {CharStates.Operator, (int)(CharStates.RightBracket | CharStates.Operator) },
             {CharStates.LeftBracket, 0},
             {CharStates.RightBracket, (int)(CharStates.Function | CharStates.LeftBracket) },
-            {CharStates.Function, (int)(CharStates.Digit | CharStates.Operator | CharStates.RightBracket) },
+            {CharStates.Function, (int)(/*CharStates.Digit |*/ CharStates.Operator | CharStates.RightBracket) },
             {CharStates.Start, 0 },
             {CharStates.Whitespace, 0},
         };
@@ -283,6 +283,14 @@ namespace MathExpressionParser
             if (prev == CharStates.RightBracket && current == CharStates.RightBracket)
             {
                 return true;
+            }
+            if (prev == CharStates.Digit && current == CharStates.Function)
+            {
+                return false;
+            }
+            if (prev == CharStates.Function && current == CharStates.Digit)
+            {
+                return false;
             }
             if (prev == CharStates.Whitespace)
             {
