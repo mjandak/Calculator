@@ -169,6 +169,7 @@ namespace MathExpressionParser
                 }
                 if (TokenHasEnded(previousState, currentState))
                 {
+                    var previousToken = _tokens.Peek();
                     //create new token
                     if (previousState == CharStates.Digit)
                     {
@@ -191,13 +192,23 @@ namespace MathExpressionParser
                     }
                     else if (previousState == CharStates.Digit || previousState == CharStates.Function)
                     {
+                        if (previousToken is not Operation<T> && previousToken.Text != "(")
+                        {
 
+                        }
+                        _tokens.Push(new Token(currentNumOrFunc.ToString(), i - currentNumOrFunc.Length));
+                        currentNumOrFunc.Clear();
                     }
                     else if (previousState == CharStates.LeftBracket)
                     {
-                        if (!functions.Contains(currentNumOrFunc.ToString()))
+                        if (previousToken is not Operation<T> && previousToken.Text != "(")
                         {
-                            throw new Exception($"Unknown function '{currentFunc}'");
+                            //previousToken has to be function
+                            //wrong single char previousToken should be already handled by IsStateAllowed
+                            if (!functions.Contains(currentNumOrFunc.ToString()))
+                            {
+                                throw new Exception($"Unknown function '{currentFunc}'");
+                            }
                         }
 
                         bracktets.Push('(');
