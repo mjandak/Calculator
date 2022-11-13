@@ -170,33 +170,35 @@ namespace MathExpressionParser
                 if (TokenHasEnded(previousState, currentState))
                 {
                     var previousToken = _tokens.Peek();
+
                     //create new token
-                    if (previousState == CharStates.Digit)
-                    {
-                        if (_tokens.TryPeek(out Token n) && n is Number<T>)
-                        {
-                            ThrowBadChar(i - currentNum.Length);
-                        }
-                        _tokens.Push(new Number<T>(currentNum.ToString(), i - currentNum.Length));
-                        currentNum.Clear();
-                        currentHasNumDot = false;
-                    }
-                    else if (previousState == CharStates.Function)
-                    {
-                        if (!functions.Contains(currentFunc.ToString()))
-                        {
-                            throw new Exception($"Unknown function '{currentFunc}'");
-                        }
-                        _tokens.Push(new Operation<T>(currentFunc.ToString(), i - currentFunc.Length));
-                        currentFunc.Clear();
-                    }
-                    else if (previousState == CharStates.Digit || previousState == CharStates.Function)
+
+                    //if (previousState == CharStates.Digit)
+                    //{
+                    //    if (_tokens.TryPeek(out Token n) && n is Number<T>)
+                    //    {
+                    //        ThrowBadChar(i - currentNum.Length);
+                    //    }
+                    //    _tokens.Push(new Number<T>(currentNum.ToString(), i - currentNum.Length));
+                    //    currentNum.Clear();
+                    //    currentHasNumDot = false;
+                    //}
+                    //else if (previousState == CharStates.Function)
+                    //{
+                    //    if (!functions.Contains(currentFunc.ToString()))
+                    //    {
+                    //        throw new Exception($"Unknown function '{currentFunc}'");
+                    //    }
+                    //    _tokens.Push(new Operation<T>(currentFunc.ToString(), i - currentFunc.Length));
+                    //    currentFunc.Clear();
+                    //}
+                    if (previousState == CharStates.Digit || previousState == CharStates.Function)
                     {
                         if (previousToken is not Operation<T> && previousToken.Text != "(")
                         {
-
+                            ThrowBadChar(i - currentNumOrFunc.Length);
                         }
-                        _tokens.Push(new Token(currentNumOrFunc.ToString(), i - currentNumOrFunc.Length));
+                        _tokens.Push(new Token(currentNumOrFunc.ToString(), i - currentNumOrFunc.Length, (int)(CharStates.Digit | CharStates.Function)));
                         currentNumOrFunc.Clear();
                     }
                     else if (previousState == CharStates.LeftBracket)
@@ -209,13 +211,22 @@ namespace MathExpressionParser
                             {
                                 throw new Exception($"Unknown function '{currentFunc}'");
                             }
+                            _tokens.Push(new Operation<T>(currentNumOrFunc.ToString(), i - currentNumOrFunc.Length));
+                            currentNumOrFunc.Clear();
                         }
 
                         bracktets.Push('(');
-                        _tokens.Push(new Token("(", i - 1));
+                        _tokens.Push(new Token("(", i - 1, (int)CharStates.LeftBracket));
                     }
                     else if (previousState == CharStates.Operator)
                     {
+                        if (previousToken.CharStates == (int)(CharStates.Digit | CharStates.Function))
+                        {
+                            //has to be number
+                            _tokens.Push(new Number<T>(currentNum.ToString(), i - currentNum.Length));
+                            currentNum.Clear();
+                            currentHasNumDot = false;
+                        }
                         _tokens.Push(new Operation<T>(expr[i - 1], i - 1));
                     }
                     else if (previousState == CharStates.RightBracket)
@@ -225,7 +236,7 @@ namespace MathExpressionParser
                             ThrowBadChar(i);
                         }
                         bracktets.Pop();
-                        _tokens.Push(new Token(")", i - 1));
+                        _tokens.Push(new Token(")", i - 1, (int)CharStates.RightBracket));
                     }
                 }
                 previousState = currentState;
@@ -309,19 +320,19 @@ namespace MathExpressionParser
             }
             return prev != current;
         }
+    }
 
-        enum CharStates
-        {
-            Start = 0,
-            Digit = 1,
-            Operator = 2,
-            LeftBracket = 4,
-            RightBracket = 8,
-            Function = 16,
-            Unknown = 32,
-            Whitespace = 64,
-            End = 128
-        }
+    public enum CharStates
+    {
+        Start = 0,
+        Digit = 1,
+        Operator = 2,
+        LeftBracket = 4,
+        RightBracket = 8,
+        Function = 16,
+        Unknown = 32,
+        Whitespace = 64,
+        End = 128
     }
 
     [DebuggerDisplay("{Text}")]
@@ -331,22 +342,25 @@ namespace MathExpressionParser
 
         public ushort StartIdx { get; set; }
 
+        public int CharStates { get; set; }
+
         public Token(string text, ushort startIdx)
         {
             Text = text;
             StartIdx = startIdx;
         }
 
-        public Token(string text, int startIdx)
+        public Token(string text, int startIdx, int charStates)
         {
             Text = text;
             StartIdx = (ushort)startIdx;
+            CharStates = charStates;
         }
     }
 
     public abstract class Node<T> : Token where T : INumericOps<T>, INumber
     {
-        public Node(string text, int startIdx) : base(text, startIdx)
+        public Node(string text, int startIdx) : base(text, (ushort)startIdx)
         {
 
         }
