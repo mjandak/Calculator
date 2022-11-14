@@ -133,6 +133,7 @@ namespace MathExpressionParser
             bool hasNonDigit = false;
             int currentCharStates = 0;
             bool currentHasNumDot = false;
+            bool number = true;
 
             for (int i = 0; i <= expr.Length; i++)
             {
@@ -145,7 +146,7 @@ namespace MathExpressionParser
                     currentState = GetState(expr[i]);
                 }
 
-                if (currentState == CharState.Unknown)
+                if (currentState == CharState.NotAllowed)
                 {
                     ThrowBadChar(i);
                 }
@@ -173,14 +174,13 @@ namespace MathExpressionParser
                 {
                     //currentFunc.Append(expr[i]);
                     currentNumOrFunc.Append(expr[i]);
-                    hasNonDigit = true;
+                    number = false;
                     currentCharStates |= (int)CharState.Function;
                 }
                 if (TokenHasEnded(previousState, currentState))
                 {
-                    Token previousToken = _tokens.Peek();
-
                     //create new token
+                    Token previousToken = _tokens.Peek();
 
                     //if (previousState == CharStates.Digit)
                     //{
@@ -201,20 +201,24 @@ namespace MathExpressionParser
                     //    _tokens.Push(new Operation<T>(currentFunc.ToString(), i - currentFunc.Length));
                     //    currentFunc.Clear();
                     //}
+                    if (true)
+                    {
+
+                    }
                     if (previousState == CharState.Digit || previousState == CharState.Function)
                     {
-                        if (previousToken.CheckState(CharState.Function))
+                        if (previousToken.CheckState(CharState.Function) || previousToken.CheckState(CharState.Digit) || previousToken.CheckState(CharState.RightBracket))
                         {
-                            ThrowBadChar(i);
+                            ThrowBadChar(i - currentNumOrFunc.Length);
                         }
-                        if (previousToken.CheckState(CharState.Digit))
-                        {
-                            ThrowBadChar(i);
-                        }
-                        if (previousToken.CheckState(CharState.RightBracket))
-                        {
-                            ThrowBadChar(i);
-                        }
+                        //if (previousToken.CheckState(CharState.Digit))
+                        //{
+                        //    ThrowBadChar(i - currentNumOrFunc.Length);
+                        //}
+                        //if (previousToken.CheckState(CharState.RightBracket))
+                        //{
+                        //    ThrowBadChar(i - currentNumOrFunc.Length);
+                        //}
                         _tokens.Push(new Token(currentNumOrFunc.ToString(), i - currentNumOrFunc.Length, currentCharStates));
                         currentNumOrFunc.Clear();
                         currentCharStates = 0;
@@ -274,7 +278,9 @@ namespace MathExpressionParser
                 previousState = currentState;
             }
 
-            if (bracktets.Count != 0)
+            var lastToken = _tokens.Peek();
+
+            if (bracktets.Count != 0 || lastToken.CheckState(CharState.Operator) || lastToken.CheckState(CharState.Function))
             {
                 throw new Exception("Unexpected end of expression.");
             }
@@ -284,11 +290,11 @@ namespace MathExpressionParser
 
         private static CharState GetState(char ch)
         {
-            if (char.IsDigit(ch) || ch == '.')
+            if (char.IsDigit(ch))
             {
                 return CharState.Digit;
             }
-            else if (char.IsLetter(ch))
+            else if (char.IsLetter(ch) || ch == '.')
             {
                 return CharState.Function;
             }
@@ -310,7 +316,7 @@ namespace MathExpressionParser
             }
             else
             {
-                return CharState.Unknown;
+                return CharState.NotAllowed;
             }
         }
 
@@ -362,7 +368,7 @@ namespace MathExpressionParser
         LeftBracket = 4,
         RightBracket = 8,
         Function = 16,
-        Unknown = 32,
+        NotAllowed = 32,
         Whitespace = 64,
         End = 128
     }

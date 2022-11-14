@@ -14,7 +14,7 @@ namespace Tests
         public void GetTokensTest()
         {
             Token[] r = Array.Empty<Token>();
-            r = Parser<DecimalFractionNumeric>.GetTokens("1 + 2/ 3-123 + sin(123)/cos(123 *   123 ) ");
+            Parser<DecimalFractionNumeric>.GetTokens("1 + 2/ 3-123 + sin(123)/cos(123 *   123 ) ");
             r = Parser<DecimalFractionNumeric>.GetTokens("729^(1/2)");
             r = Parser<DecimalFractionNumeric>.GetTokens("-2+9-(-8) ");
             r = Parser<DecimalFractionNumeric>.GetTokens("(-2) +9- (-8) ");
@@ -23,12 +23,21 @@ namespace Tests
             r = Parser<DecimalFractionNumeric>.GetTokens("234.56*log10(123.567)");
             r = Parser<DecimalFractionNumeric>.GetTokens(" 234.56 *  log10 (  123.567) ");
 
-            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56*23 / abc(123)"));
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56 * . 23 + 123"));
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56 * sin 23 + 123"));
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56 * . + 23 + 123"));
             Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56*23 5+123"));
+
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56*23 / abc(123)"));
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56*23 / abc"));
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56*23 / log10"));
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56*23 / sin"));
+
             Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("8244.0735992+2.36.25"));
+
             Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens(" 7+ (5 "));
             Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens(" 7  + ((5* 3  )"));
-            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56*23 5+123"));
+            
         }
 
         [Test]
