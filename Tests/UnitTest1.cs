@@ -20,6 +20,8 @@ namespace Tests
             r = Parser<DecimalFractionNumeric>.GetTokens("(-2) +9- (-8) ");
             r = Parser<DecimalFractionNumeric>.GetTokens("234.56*23.+123");
             r = Parser<DecimalFractionNumeric>.GetTokens("234.56*.23+123");
+            r = Parser<DecimalFractionNumeric>.GetTokens("234.56*log10(123.567)");
+            r = Parser<DecimalFractionNumeric>.GetTokens(" 234.56 *  log10 (  123.567) ");
 
             Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56*23 / abc(123)"));
             Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56*23 5+123"));

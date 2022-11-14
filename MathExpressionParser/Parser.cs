@@ -122,6 +122,7 @@ namespace MathExpressionParser
         public static Token[] GetTokens(string expr)
         {
             _tokens = new Stack<Token>();
+            _tokens.Push(new Token(null, 0, (int)CharState.Start));
             Stack<char> bracktets = new();
             CharState previousState = CharState.Start;
             CharState currentState;
@@ -148,10 +149,10 @@ namespace MathExpressionParser
                 {
                     ThrowBadChar(i);
                 }
-                if (!IsStateAllowed(previousState, currentState))
-                {
-                    ThrowBadChar(i);
-                }
+                //if (!IsStateAllowed(previousState, currentState))
+                //{
+                //    ThrowBadChar(i);
+                //}
                 if (currentState == CharState.Digit)
                 {
                     //currentNum.Append(expr[i]);
@@ -160,11 +161,12 @@ namespace MathExpressionParser
                     currentCharStates |= (int)CharState.Digit;
                     if (expr[i] == '.')
                     {
-                        if (currentHasNumDot)
-                        {
-                            ThrowBadChar(i);
-                        }
-                        else { currentHasNumDot = true; }
+                        currentHasNumDot = true;
+                        //if (currentHasNumDot)
+                        //{
+                        //    ThrowBadChar(i);
+                        //}
+                        //else { currentHasNumDot = true; }
                     }
                 }
                 else if (currentState == CharState.Function)
@@ -176,7 +178,7 @@ namespace MathExpressionParser
                 }
                 if (TokenHasEnded(previousState, currentState))
                 {
-                    var previousToken = _tokens.Peek();
+                    Token previousToken = _tokens.Peek();
 
                     //create new token
 
@@ -215,6 +217,7 @@ namespace MathExpressionParser
                         }
                         _tokens.Push(new Token(currentNumOrFunc.ToString(), i - currentNumOrFunc.Length, currentCharStates));
                         currentNumOrFunc.Clear();
+                        currentCharStates = 0;
                         hasDigit = hasNonDigit = false;
                     }
                     else if (previousState == CharState.LeftBracket)
@@ -226,14 +229,13 @@ namespace MathExpressionParser
                         if (previousToken.CheckState(CharState.Digit) || previousToken.CheckState(CharState.Function))
                         {
                             //previousToken has to be function
-                            if (!functions.Contains(currentNumOrFunc.ToString()))
+                            if (!functions.Contains(previousToken.Text))
                             {
-                                throw new Exception($"Unknown function '{currentNumOrFunc}'");
+                                throw new Exception($"Unknown function '{previousToken.Text}'");
                             }
-                            Operation<T> o = new(currentNumOrFunc.ToString(), i - currentNumOrFunc.Length);
+                            Operation<T> o = new(previousToken.Text, previousToken.StartIdx);
                             _tokens.Pop();
                             _tokens.Push(o);
-                            currentNumOrFunc.Clear();
                         }
 
                         bracktets.Push('(');
@@ -245,14 +247,13 @@ namespace MathExpressionParser
                         {
                             ThrowBadChar(i);
                         }
-                        //is not function
+                        //previousToken is not function
                         if (previousToken.CheckState(CharState.Digit))
                         {
-                            Number<T> n = new(currentNumOrFunc.ToString(), i - currentNumOrFunc.Length);
+                            //previousToken is digit 
+                            Number<T> n = new(previousToken.Text, previousToken.StartIdx);
                             _tokens.Pop();
                             _tokens.Push(n);
-                            currentNumOrFunc.Clear();
-                            currentHasNumDot = false;
                             _tokens.Push(new Operation<T>(expr[i - 1], i - 1));
                         }
                         else
