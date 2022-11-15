@@ -14,7 +14,7 @@ namespace Tests
         public void GetTokensTest()
         {
             Token[] r = Array.Empty<Token>();
-            Parser<DecimalFractionNumeric>.GetTokens("1 + 2/ 3-123 + sin(123)/cos(123 *   123 ) ");
+            r = Parser<DecimalFractionNumeric>.GetTokens("1 + 2/ 3-123 + sin(123)/cos(123 *   123 ) ");
             r = Parser<DecimalFractionNumeric>.GetTokens("729^(1/2)");
             r = Parser<DecimalFractionNumeric>.GetTokens("-2+9-(-8) ");
             r = Parser<DecimalFractionNumeric>.GetTokens("(-2) +9- (-8) ");
@@ -37,7 +37,7 @@ namespace Tests
 
             Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens(" 7+ (5 "));
             Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens(" 7  + ((5* 3  )"));
-            
+
         }
 
         [Test]
@@ -91,7 +91,7 @@ namespace Tests
             Assert.That<decimal>(d, Is.EqualTo(1m));
 
             r = Parser<DecimalFractionNumeric>.ParseExpr("  -3+ 2 ");
-            d= r.Evalute();
+            d = r.Evalute();
             Assert.That<decimal>(d, Is.EqualTo(-1m));
 
             r = Parser<DecimalFractionNumeric>.ParseExpr("26409387504754779197847983445/79228162514264337593543950335*79228162514264337593543950335");

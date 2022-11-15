@@ -134,6 +134,7 @@ namespace MathExpressionParser
             int currentCharStates = 0;
             bool currentHasNumDot = false;
             bool number = true;
+            ushort numberOfDots = 0;
 
             for (int i = 0; i <= expr.Length; i++)
             {
@@ -162,6 +163,7 @@ namespace MathExpressionParser
                     currentCharStates |= (int)CharState.Digit;
                     if (expr[i] == '.')
                     {
+                        numberOfDots++;
                         currentHasNumDot = true;
                         //if (currentHasNumDot)
                         //{
@@ -201,27 +203,30 @@ namespace MathExpressionParser
                     //    _tokens.Push(new Operation<T>(currentFunc.ToString(), i - currentFunc.Length));
                     //    currentFunc.Clear();
                     //}
-                    if (true)
-                    {
 
-                    }
                     if (previousState == CharState.Digit || previousState == CharState.Function)
                     {
                         if (previousToken.CheckState(CharState.Function) || previousToken.CheckState(CharState.Digit) || previousToken.CheckState(CharState.RightBracket))
                         {
                             ThrowBadChar(i - currentNumOrFunc.Length);
                         }
-                        //if (previousToken.CheckState(CharState.Digit))
-                        //{
-                        //    ThrowBadChar(i - currentNumOrFunc.Length);
-                        //}
-                        //if (previousToken.CheckState(CharState.RightBracket))
-                        //{
-                        //    ThrowBadChar(i - currentNumOrFunc.Length);
-                        //}
-                        _tokens.Push(new Token(currentNumOrFunc.ToString(), i - currentNumOrFunc.Length, currentCharStates));
+                        if ((currentCharStates & (int)CharState.Function) == 0 && numberOfDots < 2)
+                        {
+                            //can be number or function
+                            _tokens.Push(new Token(currentNumOrFunc.ToString(), i - currentNumOrFunc.Length, currentCharStates));
+                        }
+                        else
+                        {
+                            //has to be function
+                            if (!functions.Contains(currentNumOrFunc.ToString()))
+                            {
+                                throw new Exception($"Unknown function '{currentNumOrFunc}'");
+                            }
+                            _tokens.Push(new Operation<T>(currentNumOrFunc.ToString(), i - currentNumOrFunc.Length, CharState.Function));
+                        }
                         currentNumOrFunc.Clear();
                         currentCharStates = 0;
+                        numberOfDots = 0;
                         hasDigit = hasNonDigit = false;
                     }
                     else if (previousState == CharState.LeftBracket)
@@ -230,14 +235,14 @@ namespace MathExpressionParser
                         {
                             ThrowBadChar(i);
                         }
-                        if (previousToken.CheckState(CharState.Digit) || previousToken.CheckState(CharState.Function))
+                        if (previousToken.CheckState(CharState.Digit))
                         {
-                            //previousToken has to be function
+                            //previousToken is considered function
                             if (!functions.Contains(previousToken.Text))
                             {
                                 throw new Exception($"Unknown function '{previousToken.Text}'");
                             }
-                            Operation<T> o = new(previousToken.Text, previousToken.StartIdx);
+                            Operation<T> o = new(previousToken.Text, previousToken.StartIdx, CharState.Function);
                             _tokens.Pop();
                             _tokens.Push(o);
                         }
@@ -247,6 +252,10 @@ namespace MathExpressionParser
                     }
                     else if (previousState == CharState.Operator)
                     {
+                        if (previousToken.CheckState(CharState.Operator))
+                        {
+                            ThrowBadChar(i);
+                        }
                         if (previousToken.CheckState(CharState.Function))
                         {
                             ThrowBadChar(i);
@@ -258,12 +267,9 @@ namespace MathExpressionParser
                             Number<T> n = new(previousToken.Text, previousToken.StartIdx);
                             _tokens.Pop();
                             _tokens.Push(n);
-                            _tokens.Push(new Operation<T>(expr[i - 1], i - 1));
+
                         }
-                        else
-                        {
-                            _tokens.Push(new Operation<T>(expr[i - 1], i - 1));
-                        }
+                        _tokens.Push(new Operation<T>(expr[i - 1], i - 1, CharState.Operator));
                     }
                     else if (previousState == CharState.RightBracket)
                     {
@@ -411,10 +417,7 @@ namespace MathExpressionParser
 
     public abstract class Node<T> : Token where T : INumericOps<T>, INumber
     {
-        public Node(string text, int startIdx, CharState charState) : base(text, (ushort)startIdx, (int)charState)
-        {
-
-        }
+        public Node(string text, int startIdx, CharState charState) : base(text, (ushort)startIdx, (int)charState) { }
         public abstract Operation<T> Parent { get; set; }
         public abstract string ToJson();
         public abstract T Evalute();
@@ -426,11 +429,11 @@ namespace MathExpressionParser
         private Node<T> _left;
         private Node<T> _right;
 
-        public Operation(string symbol, int startIdx) : base(symbol, startIdx, CharState.Operator)
+        public Operation(string symbol, int startIdx, CharState charState) : base(symbol, startIdx, charState)
         {
         }
 
-        public Operation(char symbol, int startIdx) : base(symbol.ToString(), startIdx, CharState.Operator)
+        public Operation(char symbol, int startIdx, CharState charState) : base(symbol.ToString(), startIdx, charState)
         {
         }
 
