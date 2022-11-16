@@ -66,6 +66,14 @@ namespace Tests
             a = Parser<DecimalFractionNumeric>.ParseExpr("sin(-1+2)+cos(2-(sin(2^(-1/3))))").Evalute();
             b = Parser<DecimalFractionNumeric>.ParseExpr("  sin (-1   +2) +  cos(   2-(sin (   2^ (-1/    3) )) ) ").Evalute();
             Assert.That(a, Is.EqualTo(b));
+
+            a = Parser<DecimalFractionNumeric>.ParseExpr("log10(10)").Evalute();
+            b = Parser<DecimalFractionNumeric>.ParseExpr(" log10 ( 10  ) ").Evalute();
+            Assert.That(a, Is.EqualTo(b));
+
+            a = Parser<DecimalFractionNumeric>.ParseExpr("ln(1)").Evalute();
+            b = Parser<DecimalFractionNumeric>.ParseExpr(" ln  (  1) ").Evalute();
+            Assert.That(a, Is.EqualTo(b));
         }
 
         [Test]
