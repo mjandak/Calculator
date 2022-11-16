@@ -23,6 +23,9 @@ namespace Tests
             r = Parser<DecimalFractionNumeric>.GetTokens("234.56*log10(123.567)");
             r = Parser<DecimalFractionNumeric>.GetTokens(" 234.56 *  log10 (  123.567) ");
 
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("."));
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("sin ."));
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("sin(.)"));
             Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56 * . 23 + 123"));
             Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56 * sin 23 + 123"));
             Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56 * . + 23 + 123"));
@@ -43,6 +46,8 @@ namespace Tests
         [Test]
         public void ParseExprTest()
         {
+            var x = Parser<DecimalFractionNumeric>.ParseExpr("sin()").Evalute();
+
             var a = Parser<DecimalFractionNumeric>.ParseExpr("1+(2/3)").Evalute();
             var b = Parser<DecimalFractionNumeric>.ParseExpr(" 1  +(  2/ 3)   ").Evalute();
             Assert.That(a, Is.EqualTo(b));

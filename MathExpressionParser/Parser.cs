@@ -62,32 +62,32 @@ namespace MathExpressionParser
             return ParseExpr(GetTokens(expr));
         }
 
-        private static Node<T> ParseExpr(Token[] symbols)
+        private static Node<T> ParseExpr(Token[] tokens)
         {
-            int? opIdx = FindFirstLowestPriorityOp(symbols);
+            int? opIdx = FindFirstLowestPriorityOp(tokens);
             if (opIdx == null)
             {
                 //expr is a single number or expression in brackets or function
-                if (symbols.First() is Number<T> number)
+                if (tokens.First() is Number<T> number)
                 {
                     //number
                     return number;
                 }
-                if (symbols.First().Text == "(")
+                if (tokens.First().Text == "(")
                 {
                     //sub-expression
-                    return ParseExpr(symbols.Skip(1).Take(symbols.Length - 2).ToArray());
+                    return ParseExpr(tokens.Skip(1).Take(tokens.Length - 2).ToArray());
                 }
-                if (symbols.First() is Operation<T> fn)
+                if (tokens.First() is Operation<T> fn)
                 {
                     //function
-                    fn.Left = ParseExpr(symbols.Skip(1).ToArray());
+                    fn.Left = ParseExpr(tokens.Skip(1).ToArray());
                     return fn;
                 }
                 return null;
             }
 
-            if (symbols[opIdx.Value] is not Operation<T> op)
+            if (tokens[opIdx.Value] is not Operation<T> op)
             {
                 throw new Exception("Unexpected symbol.");
             }
@@ -99,11 +99,11 @@ namespace MathExpressionParser
             }
             else
             {
-                left = symbols.Take(opIdx.Value).ToArray();
+                left = tokens.Take(opIdx.Value).ToArray();
                 op.Left = ParseExpr(left);
             }
 
-            Token[] right = symbols.Skip(opIdx.Value + 1).ToArray();
+            Token[] right = tokens.Skip(opIdx.Value + 1).ToArray();
             op.Right = ParseExpr(right);
 
             return op;
