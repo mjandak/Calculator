@@ -46,7 +46,8 @@ namespace Tests
         [Test]
         public void ParseExprTest()
         {
-            var x = Parser<DecimalFractionNumeric>.ParseExpr("sin()").Evalute();
+            var x = Parser<DecimalFractionNumeric>.ParseExpr("6*(2.3+sin(12))").Evalute();
+            var y = Parser<DecimalFractionNumeric>.ParseExpr("7+6*(2.3+sin(12))").Evalute();
 
             var a = Parser<DecimalFractionNumeric>.ParseExpr("1+(2/3)").Evalute();
             var b = Parser<DecimalFractionNumeric>.ParseExpr(" 1  +(  2/ 3)   ").Evalute();
