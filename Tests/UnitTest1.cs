@@ -20,18 +20,34 @@ namespace Tests
             r = Parser<DecimalFractionNumeric>.GetTokens("(-2) +9- (-8) ");
             r = Parser<DecimalFractionNumeric>.GetTokens("234.56*23.+123");
             r = Parser<DecimalFractionNumeric>.GetTokens("234.56*.23+123");
+            r = Parser<DecimalFractionNumeric>.GetTokens("234.56*log10(123.567)");
+            r = Parser<DecimalFractionNumeric>.GetTokens(" 234.56 *  log10 (  123.567) ");
+
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("."));
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("sin ."));
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("sin(.)"));
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56 * . 23 + 123"));
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56 * sin 23 + 123"));
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56 * . + 23 + 123"));
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56*23 5+123"));
 
             Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56*23 / abc(123)"));
-            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56*23 5+123"));
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56*23 / abc"));
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56*23 / log10"));
+            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56*23 / sin"));
+
             Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("8244.0735992+2.36.25"));
+
             Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens(" 7+ (5 "));
             Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens(" 7  + ((5* 3  )"));
-            Assert.Throws<Exception>(() => Parser<DecimalFractionNumeric>.GetTokens("234.56*23 5+123"));
+
         }
 
         [Test]
         public void ParseExprTest()
         {
+            var x = Parser<DecimalFractionNumeric>.ParseExpr("sin()").Evalute();
+
             var a = Parser<DecimalFractionNumeric>.ParseExpr("1+(2/3)").Evalute();
             var b = Parser<DecimalFractionNumeric>.ParseExpr(" 1  +(  2/ 3)   ").Evalute();
             Assert.That(a, Is.EqualTo(b));
@@ -54,6 +70,14 @@ namespace Tests
 
             a = Parser<DecimalFractionNumeric>.ParseExpr("sin(-1+2)+cos(2-(sin(2^(-1/3))))").Evalute();
             b = Parser<DecimalFractionNumeric>.ParseExpr("  sin (-1   +2) +  cos(   2-(sin (   2^ (-1/    3) )) ) ").Evalute();
+            Assert.That(a, Is.EqualTo(b));
+
+            a = Parser<DecimalFractionNumeric>.ParseExpr("log10(10)").Evalute();
+            b = Parser<DecimalFractionNumeric>.ParseExpr(" log10 ( 10  ) ").Evalute();
+            Assert.That(a, Is.EqualTo(b));
+
+            a = Parser<DecimalFractionNumeric>.ParseExpr("ln(1)").Evalute();
+            b = Parser<DecimalFractionNumeric>.ParseExpr(" ln  (  1) ").Evalute();
             Assert.That(a, Is.EqualTo(b));
         }
 
@@ -80,7 +104,7 @@ namespace Tests
             Assert.That<decimal>(d, Is.EqualTo(1m));
 
             r = Parser<DecimalFractionNumeric>.ParseExpr("  -3+ 2 ");
-            d= r.Evalute();
+            d = r.Evalute();
             Assert.That<decimal>(d, Is.EqualTo(-1m));
 
             r = Parser<DecimalFractionNumeric>.ParseExpr("26409387504754779197847983445/79228162514264337593543950335*79228162514264337593543950335");

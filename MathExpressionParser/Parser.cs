@@ -20,38 +20,28 @@ namespace MathExpressionParser
             {"^", 4},
         };
         private static readonly string[] operators = new string[] { "+", "-", "*", "/", "^", };
-        private static readonly string[] functions = new string[] { "sin", "cos", "tan", "cot", "log" };
-        private static readonly Dictionary<States, int> _wrongStates = new()
-        {
-            {States.Digit, (int)(States.LeftBracket | States.Function) },
-            {States.Operator, (int)(States.RightBracket | States.Operator) },
-            {States.LeftBracket, 0},
-            {States.RightBracket, (int)(States.Function | States.LeftBracket) },
-            {States.Function, (int)(States.Digit | States.Operator | States.RightBracket) },
-            {States.Start, 0 },
-            {States.Whitespace, 0},
-        };
+        private static readonly string[] functions = new string[] { "sin", "cos", "tan", "cot", "log10", "ln" };
         private static Stack<Token> _tokens;
 
-        private static int? FindFirstLowestPriorityOp(Token[] symbols)
+        private static int? FindFirstLowestPriorityOp(Token[] tokens)
         {
             int lowestPriority = int.MaxValue;
             int? ret = null;
             ushort bracketsCount = 0;
-            for (int i = symbols.Length - 1; i > -1; i--)
+            for (int i = tokens.Length - 1; i > -1; i--)
             {
-                if (symbols[i].Text == ")")
+                if (tokens[i].Text == ")")
                 {
                     bracketsCount++;
                     continue;
                 }
-                else if (symbols[i].Text == "(")
+                else if (tokens[i].Text == "(")
                 {
                     bracketsCount--;
                     continue;
                 }
                 if (bracketsCount > 0) continue;
-                if (_priorities.TryGetValue(symbols[i].Text, out int priority))
+                if (_priorities.TryGetValue(tokens[i].Text, out int priority))
                 {
                     if (priority < lowestPriority)
                     {
@@ -72,32 +62,32 @@ namespace MathExpressionParser
             return ParseExpr(GetTokens(expr));
         }
 
-        private static Node<T> ParseExpr(Token[] symbols)
+        private static Node<T> ParseExpr(Token[] tokens)
         {
-            int? opIdx = FindFirstLowestPriorityOp(symbols);
+            int? opIdx = FindFirstLowestPriorityOp(tokens);
             if (opIdx == null)
             {
                 //expr is a single number or expression in brackets or function
-                if (symbols.First() is Number<T> number)
+                if (tokens.First() is Number<T> number)
                 {
                     //number
                     return number;
                 }
-                if (symbols.First().Text == "(")
+                if (tokens.First().Text == "(")
                 {
                     //sub-expression
-                    return ParseExpr(symbols.Skip(1).Take(symbols.Length - 2).ToArray());
+                    return ParseExpr(tokens.Skip(1).Take(tokens.Length - 2).ToArray());
                 }
-                if (symbols.First() is Operation<T> fn)
+                if (tokens.First() is Operation<T> fn)
                 {
                     //function
-                    fn.Left = ParseExpr(symbols.Skip(1).ToArray());
+                    fn.Left = ParseExpr(tokens.Skip(1).ToArray());
                     return fn;
                 }
                 return null;
             }
 
-            if (symbols[opIdx.Value] is not Operation<T> op)
+            if (tokens[opIdx.Value] is not Operation<T> op)
             {
                 throw new Exception("Unexpected symbol.");
             }
@@ -109,11 +99,11 @@ namespace MathExpressionParser
             }
             else
             {
-                left = symbols.Take(opIdx.Value).ToArray();
+                left = tokens.Take(opIdx.Value).ToArray();
                 op.Left = ParseExpr(left);
             }
 
-            Token[] right = symbols.Skip(opIdx.Value + 1).ToArray();
+            Token[] right = tokens.Skip(opIdx.Value + 1).ToArray();
             op.Right = ParseExpr(right);
 
             return op;
@@ -122,130 +112,189 @@ namespace MathExpressionParser
         public static Token[] GetTokens(string expr)
         {
             _tokens = new Stack<Token>();
+            _tokens.Push(new Token(null, 0, (int)CharState.Start));
             Stack<char> bracktets = new();
-            States previousState = States.Start;
-            States currentState;
-            StringBuilder currentFunc = new();
-            StringBuilder currentNum = new();
-            bool currentHasNumDot = false;
+            CharState previousState = CharState.Start;
+            CharState currentState;
+            StringBuilder currentNumOrFunc = new();
+            int currentNumOrFuncStates = 0;
+            ushort numberOfDots = 0;
 
             for (int i = 0; i <= expr.Length; i++)
             {
                 if (i == expr.Length)
                 {
-                    currentState = States.End;
+                    currentState = CharState.End;
                 }
                 else
                 {
                     currentState = GetState(expr[i]);
                 }
 
-                if (currentState == States.Unknown)
+                if (currentState == CharState.NotAllowed)
                 {
                     ThrowBadChar(i);
                 }
-                if (!IsStateAllowed(previousState, currentState))
+                if (currentState == CharState.Digit)
                 {
-                    ThrowBadChar(i);
+                    currentNumOrFunc.Append(expr[i]);
+                    currentNumOrFuncStates |= (int)CharState.Digit;
                 }
-                if (currentState == States.Digit)
+                else if (currentState == CharState.Function)
                 {
-                    //symbols.Peek().Text += expr[i];
-                    currentNum.Append(expr[i]);
-                    if (expr[i] == '.')
+                    currentNumOrFunc.Append(expr[i]);
+                    currentNumOrFuncStates |= (int)CharState.Function;
+                }
+                else if (currentState == CharState.Dot)
+                {
+                    currentNumOrFunc.Append(expr[i]);
+                    currentNumOrFuncStates |= (int)CharState.Dot;
+                    numberOfDots++;
+                }
+                if (TokenHasEnded(previousState, currentState))
+                {
+                    //create new token
+
+                    Token previousToken = _tokens.Peek();
+
+                    if (previousState == CharState.Digit || previousState == CharState.Function || previousState == CharState.Dot)
                     {
-                        if (currentHasNumDot)
+                        if (previousToken.HasState(CharState.Function) || previousToken.HasState(CharState.Digit) || previousToken.HasState(CharState.RightBracket))
+                        {
+                            ThrowBadChar(i - currentNumOrFunc.Length);
+                        }
+                        if ((currentNumOrFuncStates & (int)CharState.Digit) == 0 || numberOfDots > 1)
+                        {
+                            //has to be function
+                            if (!functions.Contains(currentNumOrFunc.ToString()))
+                            {
+                                throw new Exception($"Unknown function '{currentNumOrFunc}'");
+                            }
+                            _tokens.Push(new Operation<T>(currentNumOrFunc.ToString(), i - currentNumOrFunc.Length, CharState.Function));
+                        }
+                        else
+                        {
+                            //can be number or function
+                            _tokens.Push(new Token(currentNumOrFunc.ToString(), i - currentNumOrFunc.Length, currentNumOrFuncStates));
+                        }
+                        currentNumOrFunc.Clear();
+                        currentNumOrFuncStates = 0;
+                        numberOfDots = 0;
+                    }
+                    else if (previousState == CharState.LeftBracket)
+                    {
+                        if (previousToken.HasState(CharState.RightBracket))
                         {
                             ThrowBadChar(i);
                         }
-                        else { currentHasNumDot = true; }
-                    }
-                }
-                else if (currentState == States.Function)
-                {
-                    currentFunc.Append(expr[i]);
-                }
-                if (HasTokenEnded(previousState, currentState))
-                {
-                    //create new token
-                    if (previousState == States.Digit)
-                    {
-                        if (_tokens.TryPeek(out Token n) && n is Number<T>)
+                        if (previousToken.HasState(CharState.Digit))
                         {
-                            ThrowBadChar(i - currentNum.Length);
+                            //previousToken is considered function
+                            if (!functions.Contains(previousToken.Text))
+                            {
+                                throw new Exception($"Unknown function '{previousToken.Text}'");
+                            }
+                            Operation<T> o = new(previousToken.Text, previousToken.StartIdx, CharState.Function);
+                            _tokens.Pop();
+                            _tokens.Push(o);
                         }
-                        _tokens.Push(new Number<T>(currentNum.ToString(), i - currentNum.Length));
-                        currentNum.Clear();
-                        currentHasNumDot = false;
-                    }
-                    else if (previousState == States.Function)
-                    {
-                        if (!functions.Contains(currentFunc.ToString()))
-                        {
-                            throw new Exception($"Unknown function '{currentFunc}'");
-                        }
-                        _tokens.Push(new Operation<T>(currentFunc.ToString(), i - currentFunc.Length));
-                        currentFunc.Clear();
-                    }
-                    else if (previousState == States.LeftBracket)
-                    {
+
                         bracktets.Push('(');
-                        _tokens.Push(new Token("(", i - 1));
+                        _tokens.Push(new Token("(", i - 1, (int)CharState.LeftBracket));
                     }
-                    else if (previousState == States.Operator)
+                    else if (previousState == CharState.Operator)
                     {
-                        _tokens.Push(new Operation<T>(expr[i - 1], i - 1));
+                        if (previousToken.HasState(CharState.Operator))
+                        {
+                            ThrowBadChar(i);
+                        }
+                        if (previousToken.HasState(CharState.Function))
+                        {
+                            ThrowBadChar(i);
+                        }
+                        //previousToken is not function
+                        if (previousToken.HasState(CharState.Digit))
+                        {
+                            //previousToken is number 
+                            Number<T> n = new(previousToken.Text, previousToken.StartIdx);
+                            _tokens.Pop();
+                            _tokens.Push(n);
+
+                        }
+                        _tokens.Push(new Operation<T>(expr[i - 1], i - 1, CharState.Operator));
                     }
-                    else if (previousState == States.RightBracket)
+                    else if (previousState == CharState.RightBracket)
                     {
                         if (bracktets.Count < 1)
                         {
                             ThrowBadChar(i);
                         }
+                        if (previousToken.HasState(CharState.Function))
+                        {
+                            ThrowBadChar(i);
+                        }
+                        if (previousToken.HasState(CharState.Digit))
+                        {
+                            //previousToken is number
+                            _tokens.Pop();
+                            _tokens.Push(new Number<T>(previousToken.Text, previousToken.StartIdx));
+                        }
+                        _tokens.Push(new Token(")", i - 1, (int)CharState.RightBracket));
                         bracktets.Pop();
-                        _tokens.Push(new Token(")", i - 1));
                     }
                 }
                 previousState = currentState;
             }
 
-            if (bracktets.Count != 0)
+            var lastToken = _tokens.Peek();
+
+            if (bracktets.Count != 0 || lastToken.HasState(CharState.Operator) || lastToken.HasState(CharState.Function))
             {
                 throw new Exception("Unexpected end of expression.");
             }
 
-            return _tokens.Reverse().ToArray();
+            if (lastToken.HasState(CharState.Digit))
+            {
+                _tokens.Pop();
+                _tokens.Push(new Number<T>(lastToken.Text, lastToken.StartIdx));
+            }
+
+            return _tokens.Reverse().Skip(1).ToArray();
         }
 
-        private static States GetState(char ch)
+        private static CharState GetState(char ch)
         {
-            if (char.IsDigit(ch) || ch == '.')
+            if (char.IsDigit(ch))
             {
-                return States.Digit;
+                return CharState.Digit;
+            }
+            else if (ch == '.')
+            {
+                return CharState.Dot;
             }
             else if (char.IsLetter(ch))
             {
-                return States.Function;
+                return CharState.Function;
             }
             else if (char.IsWhiteSpace(ch))
             {
-                return States.Whitespace;
+                return CharState.Whitespace;
             }
             else if (ch == '(')
             {
-                return States.LeftBracket;
+                return CharState.LeftBracket;
             }
             else if (ch == ')')
             {
-                return States.RightBracket;
+                return CharState.RightBracket;
             }
             else if (operators.Contains(ch.ToString()))
             {
-                return States.Operator;
+                return CharState.Operator;
             }
             else
             {
-                return States.Unknown;
+                return CharState.NotAllowed;
             }
         }
 
@@ -254,44 +303,52 @@ namespace MathExpressionParser
             throw new Exception($"Unexpected character at {i}.");
         }
 
-        private static bool IsStateAllowed(States prev, States current)
+        private static bool TokenHasEnded(CharState prev, CharState current)
         {
-            return (_wrongStates[prev] & (int)current) == 0;
-        }
-
-        private static bool HasTokenEnded(States prev, States current)
-        {
-            if (prev == States.Start)
+            if (prev == CharState.Start)
             {
                 return false;
             }
-            if (prev == States.LeftBracket && current == States.LeftBracket)
+            if (prev == CharState.Whitespace)
+            {
+                return false;
+            }
+            if (prev == CharState.LeftBracket && current == CharState.LeftBracket)
             {
                 return true;
             }
-            if (prev == States.RightBracket && current == States.RightBracket)
+            if (prev == CharState.RightBracket && current == CharState.RightBracket)
             {
                 return true;
             }
-            if (prev == States.Whitespace)
+            if (prev == CharState.Digit && (current == CharState.Function || current == CharState.Dot))
+            {
+                return false;
+            }
+            if (prev == CharState.Function && (current == CharState.Digit || current == CharState.Dot))
+            {
+                return false;
+            }
+            if (prev == CharState.Dot && (current == CharState.Function || current == CharState.Digit))
             {
                 return false;
             }
             return prev != current;
         }
+    }
 
-        enum States
-        {
-            Start = 0,
-            Digit = 1,
-            Operator = 2,
-            LeftBracket = 4,
-            RightBracket = 8,
-            Function = 16,
-            Unknown = 32,
-            Whitespace = 64,
-            End = 128
-        }
+    public enum CharState
+    {
+        Start = 0,
+        Digit = 1,
+        Operator = 2,
+        LeftBracket = 4,
+        RightBracket = 8,
+        Function = 16,
+        NotAllowed = 32,
+        Whitespace = 64,
+        End = 128,
+        Dot = 256
     }
 
     [DebuggerDisplay("{Text}")]
@@ -301,25 +358,30 @@ namespace MathExpressionParser
 
         public ushort StartIdx { get; set; }
 
+        public int CharStates { get; set; }
+
         public Token(string text, ushort startIdx)
         {
             Text = text;
             StartIdx = startIdx;
         }
 
-        public Token(string text, int startIdx)
+        public Token(string text, int startIdx, int charStates)
         {
             Text = text;
             StartIdx = (ushort)startIdx;
+            CharStates = charStates;
+        }
+
+        public bool HasState(CharState state)
+        {
+            return (CharStates & (int)state) == (int)state;
         }
     }
 
     public abstract class Node<T> : Token where T : INumericOps<T>, INumber
     {
-        public Node(string text, int startIdx) : base(text, startIdx)
-        {
-
-        }
+        public Node(string text, int startIdx, CharState charState) : base(text, (ushort)startIdx, (int)charState) { }
         public abstract Operation<T> Parent { get; set; }
         public abstract string ToJson();
         public abstract T Evalute();
@@ -331,11 +393,11 @@ namespace MathExpressionParser
         private Node<T> _left;
         private Node<T> _right;
 
-        public Operation(string symbol, int startIdx) : base(symbol, startIdx)
+        public Operation(string symbol, int startIdx, CharState charState) : base(symbol, startIdx, charState)
         {
         }
 
-        public Operation(char symbol, int startIdx) : base(symbol.ToString(), startIdx)
+        public Operation(char symbol, int startIdx, CharState charState) : base(symbol.ToString(), startIdx, charState)
         {
         }
 
@@ -389,8 +451,10 @@ namespace MathExpressionParser
                 case "cot":
                     //return 1 / Math.Tan(Left.Evalute());
                     throw new NotImplementedException();
-                case "log":
-                    return Left.Evalute().Log();
+                case "log10":
+                    return Left.Evalute().Log10();
+                case "ln":
+                    return Left.Evalute().Ln();
                 default:
                     throw new Exception($"Unknown operation: {Text}");
             }
@@ -403,7 +467,7 @@ namespace MathExpressionParser
 
         public override Operation<T> Parent { get; set; }
 
-        public Number(string number, int startIdx) : base(number, startIdx)
+        public Number(string number, int startIdx) : base(number, startIdx, CharState.Digit)
         {
             T n = new();
             n.SetValue(number);
@@ -574,9 +638,14 @@ namespace MathExpressionParser
             _enumerator = decimal.Parse(value);
         }
 
-        public DecimalFractionNumeric Log()
+        public DecimalFractionNumeric Log10()
         {
             return new DecimalFractionNumeric(ElementaryFunctionsDecimal.Log10(Value));
+        }
+
+        public DecimalFractionNumeric Ln()
+        {
+            return new DecimalFractionNumeric(ElementaryFunctionsDecimal.Ln(Value));
         }
     }
 
@@ -649,7 +718,12 @@ namespace MathExpressionParser
             throw new NotImplementedException();
         }
 
-        public DecimalNumneric Log()
+        public DecimalNumneric Log10()
+        {
+            throw new NotImplementedException();
+        }
+
+        public DecimalNumneric Ln()
         {
             throw new NotImplementedException();
         }
