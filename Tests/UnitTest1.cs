@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace Tests
 {
-    public class Tests
+    public class DecimalFractionNumericTests
     {
         [SetUp]
         public void Setup()
@@ -44,11 +44,8 @@ namespace Tests
         }
 
         [Test]
-        public void ParseExprTest()
+        public void Test()
         {
-            var x = Parser<DecimalFractionNumeric>.ParseExpr("6*(2.3+sin(12))").Evalute();
-            var y = Parser<DecimalFractionNumeric>.ParseExpr("7+6*(2.3+sin(12))").Evalute();
-
             var a = Parser<DecimalFractionNumeric>.ParseExpr("1+(2/3)").Evalute();
             var b = Parser<DecimalFractionNumeric>.ParseExpr(" 1  +(  2/ 3)   ").Evalute();
             Assert.That(a, Is.EqualTo(b));
@@ -83,7 +80,7 @@ namespace Tests
         }
 
         [Test]
-        public void ParseExprTest2()
+        public void Test2()
         {
             Node<DecimalFractionNumeric> r;
             DecimalFractionNumeric d;
@@ -186,6 +183,41 @@ namespace Tests
 
             r = Parser<DecimalFractionNumeric>.ParseExpr("1393.565^2");
             Assert.That<decimal>(r.Evalute(), Is.EqualTo(1942023.409225m));
+        }
+
+        [Test]
+        public void Test3()
+        {
+            DecimalFractionNumeric x;
+            x = Parser<DecimalFractionNumeric>.ParseExpr("6/(2.3+sin(12))").Evalute();
+            Console.WriteLine("3.4024656087262472790650984189845638502093432285706163835936133421...");
+            Console.WriteLine(x);
+            Console.WriteLine();
+
+            x = Parser<DecimalFractionNumeric>.ParseExpr("7+6/(2.3+sin(12))").Evalute();
+            Console.WriteLine("10.402465608726247279065098418984563850209343228570616383593613342...");
+            Console.WriteLine(x);
+            Console.WriteLine();
+
+            x = Parser<DecimalFractionNumeric>.ParseExpr("6*(2.3+sin(12))").Evalute();
+            Console.WriteLine("10.580562491997390170007754630545589246105568830331756109608000155...");
+            Console.WriteLine(x);
+            Console.WriteLine();
+
+            x = Parser<DecimalFractionNumeric>.ParseExpr("7+6*(2.3+sin(12))").Evalute();
+            Console.WriteLine("17.580562491997390170007754630545589246105568830331756109608000155...");
+            Console.WriteLine(x);
+            Console.WriteLine();
+
+            x = Parser<DecimalFractionNumeric>.ParseExpr("6+(2.3+sin(12))").Evalute();
+            Console.WriteLine("7.7634270819995650283346257717575982076842614717219593516013333592...");
+            Console.WriteLine(x);
+            Console.WriteLine();
+
+            x = Parser<DecimalFractionNumeric>.ParseExpr("6-(2.3+sin(12))").Evalute();
+            Console.WriteLine("4.2365729180004349716653742282424017923157385282780406483986666407...");
+            Console.WriteLine(x);
+            Console.WriteLine();
         }
     }
 }
