@@ -7,11 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CalculatorMAUI", "Calculato
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathExpressionParser", "MathExpressionParser\MathExpressionParser.csproj", "{7C18AA8C-45FF-4C2F-A3B6-7C1EA1E483ED}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CalcularorInterfaces", "CalcularorInterfaces\CalcularorInterfaces.csproj", "{753B5559-90C6-4399-A51B-8D5F745DDCE2}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj", "{5B531D23-DD06-4C84-821F-2F44E7F47BBC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathExpressionProvider", "MathExpressionProvider\MathExpressionProvider.csproj", "{27DDE987-F1C5-4A9D-84C7-CA6DF8280103}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathExpressionProvider", "MathExpressionProvider\MathExpressionProvider.csproj", "{27DDE987-F1C5-4A9D-84C7-CA6DF8280103}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalculatorInterfaces", "CalculatorInterfaces\CalculatorInterfaces.csproj", "{F85936F1-DA99-444D-ADF1-AC6863487714}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,6 @@ Global
 		{7C18AA8C-45FF-4C2F-A3B6-7C1EA1E483ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C18AA8C-45FF-4C2F-A3B6-7C1EA1E483ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C18AA8C-45FF-4C2F-A3B6-7C1EA1E483ED}.Release|Any CPU.Build.0 = Release|Any CPU
-		{753B5559-90C6-4399-A51B-8D5F745DDCE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{753B5559-90C6-4399-A51B-8D5F745DDCE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{753B5559-90C6-4399-A51B-8D5F745DDCE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{753B5559-90C6-4399-A51B-8D5F745DDCE2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5B531D23-DD06-4C84-821F-2F44E7F47BBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5B531D23-DD06-4C84-821F-2F44E7F47BBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B531D23-DD06-4C84-821F-2F44E7F47BBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -41,6 +37,10 @@ Global
 		{27DDE987-F1C5-4A9D-84C7-CA6DF8280103}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{27DDE987-F1C5-4A9D-84C7-CA6DF8280103}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{27DDE987-F1C5-4A9D-84C7-CA6DF8280103}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F85936F1-DA99-444D-ADF1-AC6863487714}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F85936F1-DA99-444D-ADF1-AC6863487714}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F85936F1-DA99-444D-ADF1-AC6863487714}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F85936F1-DA99-444D-ADF1-AC6863487714}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

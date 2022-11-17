@@ -3,6 +3,7 @@ using MathExpressionParser.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -641,7 +642,14 @@ namespace MathExpressionParser
         public void SetValue(string value)
         {
             _denominator = 1m;
-            _enumerator = decimal.Parse(value);
+            if (decimal.TryParse(value, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out decimal enumerator))
+            {
+                _enumerator = enumerator;
+            }
+            else
+            {
+                throw new ArgumentException($"Couldn't turn value '{value}' into decimal number.", nameof(value));
+            }
         }
 
         public DecimalFractionNumeric Log10()

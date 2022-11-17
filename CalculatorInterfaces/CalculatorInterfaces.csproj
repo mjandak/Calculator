@@ -6,9 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\CalculatorInterfaces\CalculatorInterfaces.csproj" />
-    <ProjectReference Include="..\MathExpressionParser\MathExpressionParser.csproj" />
-  </ItemGroup>
-
 </Project>
