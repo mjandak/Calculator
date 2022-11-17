@@ -507,8 +507,16 @@ namespace MathExpressionParser
         public DecimalFractionNumeric(decimal enumerator, decimal denominator)
         {
             var gcd = Gcd(enumerator, denominator);
-            _enumerator = enumerator / gcd;
-            _denominator = denominator / gcd;
+            if (gcd > 1)
+            {
+                _enumerator = enumerator / gcd;
+                _denominator = denominator / gcd;
+            }
+            else
+            {
+                _enumerator = enumerator;
+                _denominator = denominator;
+            }
         }
 
         public decimal Value
@@ -552,7 +560,9 @@ namespace MathExpressionParser
         public DecimalFractionNumeric Multiply(DecimalFractionNumeric rvalue)
         {
             var gcd1 = Gcd(_enumerator, rvalue._denominator);
+            gcd1 = gcd1 > 1 ? gcd1 : 1;
             var gcd2 = Gcd(_denominator, rvalue._enumerator);
+            gcd2 = gcd2 > 1 ? gcd2 : 1;
             var e = (_enumerator / gcd1) * (rvalue._enumerator / gcd2);
             var d = (_denominator / gcd2) * (rvalue._denominator / gcd1);
             return new DecimalFractionNumeric(e, d);
