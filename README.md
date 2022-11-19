@@ -1,6 +1,6 @@
 # Calculator
 Simple calculator created with C# and .NET MAUI.\
-Tested on Android and Windows.\
+Tested on Windows and Android 6.\
 C# decimal type is used. Max number is 79228162514264337593543950335.\
 Trigonometric, ln, and exp functions are computed with Taylor series.\
 \
