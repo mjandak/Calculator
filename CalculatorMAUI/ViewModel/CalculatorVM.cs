@@ -122,7 +122,10 @@ namespace CalculatorMAUI.ViewModel
             ErrorMsg = string.Empty;
             try
             {
-                Display = mathExprProvider.Evaluate(Display);
+                if (!string.IsNullOrWhiteSpace(Display))
+                {
+                    Display = mathExprProvider.Evaluate(Display);
+                }
             }
             catch (Exception ex)
             {

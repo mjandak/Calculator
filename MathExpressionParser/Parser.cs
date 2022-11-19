@@ -592,12 +592,12 @@ namespace MathExpressionParser
 
         public override string ToString()
         {
-            return Value.ToString();
+            return Value.ToString(CultureInfo.InvariantCulture);
         }
 
         public string ToString(int decimalPlaces)
         {
-            return decimal.Round(Value, decimalPlaces).ToString();
+            return decimal.Round(Value, decimalPlaces).ToString(CultureInfo.InvariantCulture);
         }
 
         public static decimal Gcd(decimal a, decimal b)
@@ -709,7 +709,7 @@ namespace MathExpressionParser
 
         public override string ToString()
         {
-            return _value.ToString();
+            return _value.ToString(CultureInfo.InvariantCulture);
         }
 
         public DecimalNumneric Sin()
