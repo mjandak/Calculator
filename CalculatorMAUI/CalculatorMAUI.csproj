@@ -49,6 +49,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Resources\Fonts\Aquifer.ttf" />
+	  <None Remove="Resources\Fonts\Gipsiero.otf" />
+	  <None Remove="Resources\Fonts\Kingthings Trypewriter 2.ttf" />
+	  <None Remove="Resources\Fonts\nk57-monospace-se-rg.ttf" />
+	  <None Remove="Resources\Fonts\nk57-monospace-se-rg.ttf.ttf" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <ProjectReference Include="..\MathExpressionProvider\MathExpressionProvider.csproj" />
 	</ItemGroup>
 
@@ -60,6 +68,12 @@
 
 	<ItemGroup>
 	  <MauiXaml Update="InsertBtn.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Resources\Themes\Dictionary1.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Resources\Themes\Dictionary2.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>
