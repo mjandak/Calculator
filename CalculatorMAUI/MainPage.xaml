@@ -66,10 +66,9 @@
             <local:InsertBtn x:Name="btnLog10" Text="log10" Grid.Column="1" Grid.Row="5"  CommandParameter="log10("/>
         </Grid>
 
-        <!--<Switch x:Name="themeSwitch" Grid.Row="2" Toggled="themeSwitch_Toggled"></Switch>-->
         <StackLayout Orientation="Horizontal" Grid.Row="2" Margin="8">
-            <RadioButton x:Name="rbtnNormal" Content="Normal" CheckedChanged="Normal_CheckedChanged" IsChecked="True"></RadioButton>
-            <RadioButton x:Name="rbtnRetro" Content="Retro" CheckedChanged="Retro_CheckedChanged"></RadioButton>
+            <RadioButton x:Name="rbtnNormal" Content="Simple" CheckedChanged="Normal_CheckedChanged" IsChecked="True" FontAttributes="Italic"></RadioButton>
+            <RadioButton x:Name="rbtnRetro" Content="Retro" CheckedChanged="Retro_CheckedChanged" FontAttributes="Italic"></RadioButton>
         </StackLayout>
 
     </Grid>

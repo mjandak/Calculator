@@ -13,6 +13,6 @@
     <Color x:Key="DisplayBorder">#404040</Color>
     <Color x:Key="DisplayBackground">#aaaf77</Color>
     <x:String x:Key="DisplayFont">LcdSolid</x:String>
-    <x:Double x:Key="DisplayFontSize">36</x:Double>
+    <x:Double x:Key="DisplayFontSize">24</x:Double>
     <x:Double x:Key="DisplayFontSize_small">12</x:Double>
 </ResourceDictionary>
