@@ -69,7 +69,7 @@ namespace CalculatorMAUI
         {
             if (e.Value)
             {
-                App.SetTheme("normal");
+                App.SetTheme(Themes.Simple);
             }
 
         }
@@ -78,7 +78,7 @@ namespace CalculatorMAUI
         {
             if (e.Value)
             {
-                App.SetTheme("retro");
+                App.SetTheme(Themes.Retro);
             }
         }
     }

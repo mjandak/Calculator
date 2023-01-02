@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace CalculatorMAUI.Resources.Themes
 {
-    interface ICalculatorTheme
+    public enum Themes : byte
     {
+        Simple,
+        Retro
     }
 }

@@ -6,19 +6,19 @@ namespace CalculatorMAUI
     {
         private static ResourceDictionary currentTheme;
 
-        public static void SetTheme(string name)
+        public static void SetTheme(Themes theme)
         {
             var mergedDictionaries = Current.Resources.MergedDictionaries;
             if (currentTheme != null)
             {
                 mergedDictionaries.Remove(currentTheme);
             }
-            if (name == "normal")
+            if (theme == Themes.Simple)
             {
                 currentTheme = new Dictionary1();
                 mergedDictionaries.Add(currentTheme);
             }
-            else if (name == "retro")
+            else if (theme == Themes.Retro)
             {
                 currentTheme = new Dictionary2();
                 mergedDictionaries.Add(currentTheme);
