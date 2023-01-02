@@ -30,6 +30,7 @@ namespace CalculatorMAUI
                     fonts.AddFont("Receiptional Receipt.ttf", "ReceiptionalReceipt");
                     fonts.AddFont("TEXASLED.ttf", "TEXASLED");
                     fonts.AddFont("erbos_draco_1st_open_nbp.ttf", "ErbosDraco1stOpenNBP");
+                    fonts.AddFont("Hacked CRT.ttf", "HackedCRT");
                 });
 
             builder.Services.AddSingleton<CalculatorVM>();
