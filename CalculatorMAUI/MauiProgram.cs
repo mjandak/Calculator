@@ -25,6 +25,8 @@ namespace CalculatorMAUI
                     fonts.AddFont("Aquifer.ttf", "Aquifer");
                     fonts.AddFont("Kingthings Trypewriter 2.ttf", "Kingthings Trypewriter 2");
                     fonts.AddFont("Gipsiero.otf", "Gipsiero");
+                    fonts.AddFont("dontwr_r.ttf", "dontwr_r");
+                    fonts.AddFont("repet___.ttf", "repet___");
                 });
 
             builder.Services.AddSingleton<CalculatorVM>();
