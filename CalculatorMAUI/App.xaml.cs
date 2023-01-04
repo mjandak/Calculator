@@ -15,12 +15,12 @@ namespace CalculatorMAUI
             }
             if (theme == Themes.Simple)
             {
-                currentTheme = new Dictionary1();
+                currentTheme = new Simple();
                 mergedDictionaries.Add(currentTheme);
             }
             else if (theme == Themes.Retro)
             {
-                currentTheme = new Dictionary2();
+                currentTheme = new Retro();
                 mergedDictionaries.Add(currentTheme);
             }
             else

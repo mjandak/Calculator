@@ -56,16 +56,22 @@
 	  <Compile Update="InsertBtn.xaml.cs">
 	    <DependentUpon>InsertBtn.xaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="Resources\Themes\Retro.xaml.cs">
+	    <DependentUpon>Retro.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Resources\Themes\Simple.xaml.cs">
+	    <DependentUpon>Simple.xaml</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
 	  <MauiXaml Update="InsertBtn.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Resources\Themes\Dictionary1.xaml">
+	  <MauiXaml Update="Resources\Themes\Simple.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Resources\Themes\Dictionary2.xaml">
+	  <MauiXaml Update="Resources\Themes\Retro.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>

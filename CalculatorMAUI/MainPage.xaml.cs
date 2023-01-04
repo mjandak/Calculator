@@ -46,25 +46,6 @@ namespace CalculatorMAUI
             }
         }
 
-        private void themeSwitch_Toggled(object sender, ToggledEventArgs e)
-        {
-            ICollection<ResourceDictionary> mergedDictionaries = Application.Current.Resources.MergedDictionaries;
-            if (mergedDictionaries != null)
-            {
-                //mergedDictionaries.Clear();
-                if (e.Value)
-                {
-                    mergedDictionaries.Remove(mergedDictionaries.OfType<Dictionary1>().First());
-                    mergedDictionaries.Add(new Dictionary2());
-                }
-                else
-                {
-                    mergedDictionaries.Remove(mergedDictionaries.OfType<Dictionary2>().First());
-                    mergedDictionaries.Add(new Dictionary1());
-                }
-            }
-        }
-
         private void Normal_CheckedChanged(object sender, CheckedChangedEventArgs e)
         {
             if (e.Value)

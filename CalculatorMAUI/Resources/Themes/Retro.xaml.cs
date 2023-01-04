@@ -1,8 +1,8 @@
 namespace CalculatorMAUI.Resources.Themes;
 
-public partial class Dictionary1 : ResourceDictionary
+public partial class Retro : ResourceDictionary
 {
-	public Dictionary1()
+	public Retro()
 	{
 		InitializeComponent();
 	}
