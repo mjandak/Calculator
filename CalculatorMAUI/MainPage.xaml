@@ -7,10 +7,9 @@
             <Grid RowDefinitions="auto, auto" ColumnDefinitions="*">
                 <Entry x:Name="txtDisplay" Text="{Binding Path=Display, Mode=TwoWay}" CursorPosition="{Binding Path=DisplayCaretPos, Mode=TwoWay}"
                        SelectionLength="{Binding Path=DisplaySelectedLength, Mode=TwoWay}" FontFamily="{DynamicResource DisplayFont}" FontSize="{DynamicResource DisplayFontSize}"
-                       FontAutoScalingEnabled="True" BackgroundColor="{DynamicResource DisplayBackground}" Grid.Row="0" Margin="0">
-                </Entry>
+                       FontAutoScalingEnabled="True" Background="{DynamicResource DisplayBackground}" Grid.Row="0" Margin="0" />
                 <Entry x:Name="txtMassage" Text="{Binding Path=ErrorMsg, Mode=TwoWay}" FontFamily="{DynamicResource DisplayFont}" 
-                       FontSize="{DynamicResource DisplayFontSize_small}" FontAutoScalingEnabled="True" BackgroundColor="{DynamicResource DisplayBackground}" Grid.Row="1"
+                       FontSize="{DynamicResource DisplayFontSize_small}" FontAutoScalingEnabled="True" Background="{DynamicResource DisplayBackground}" Grid.Row="1"
                        Margin="0" />
             </Grid>
         </Border>

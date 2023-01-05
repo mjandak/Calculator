@@ -218,6 +218,11 @@ namespace Tests
             Console.WriteLine("4.2365729180004349716653742282424017923157385282780406483986666407...");
             Console.WriteLine(x);
             Console.WriteLine();
+
+            x = Parser<DecimalFractionNumeric>.ParseExpr("6 / (2.3 + sin(12)) * log10(15)").Evalute();
+            Console.WriteLine("4.0016100616605070600137424849328273310562897814783549739185419694...");
+            Console.WriteLine(x);
+            Console.WriteLine();
         }
     }
 }
