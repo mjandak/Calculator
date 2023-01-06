@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net6.0-ios;net6.0-maccatalyst;net6.0-android33.0</TargetFrameworks>
+		<TargetFrameworks>net6.0-ios;net6.0-maccatalyst;net6.0-android</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.19041.0</TargetFrameworks>
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);net6.0-tizen</TargetFrameworks> -->
@@ -12,10 +12,10 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 
 		<!-- Display name -->
-		<ApplicationTitle>CalculatorMAUI</ApplicationTitle>
+		<ApplicationTitle>Calculator</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.calculatormaui</ApplicationId>
+		<ApplicationId>com.companyname.calculator</ApplicationId>
 		<ApplicationIdGuid>B06FB2F6-0221-4B10-8383-5D7D94737E2D</ApplicationIdGuid>
 
 		<!-- Versions -->
