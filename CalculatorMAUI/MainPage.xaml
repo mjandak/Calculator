@@ -1,17 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="CalculatorMAUI.MainPage" xmlns:local="clr-namespace:CalculatorMAUI" BackgroundColor="{StaticResource Gray100}">
-    <Grid RowDefinitions="auto,*" ColumnDefinitions="*">
-        <Border Grid.Row="0" StrokeThickness="2" Stroke="{StaticResource Gray600}" Margin="8,8,8,0">
+             x:Class="CalculatorMAUI.MainPage" xmlns:local="clr-namespace:CalculatorMAUI">
+    <Grid RowDefinitions="auto,8*,*" ColumnDefinitions="*">
+        <Border Grid.Row="0" StrokeThickness="2" Stroke="{DynamicResource DisplayBorder}" Margin="8,8,8,0">
             <Grid RowDefinitions="auto, auto" ColumnDefinitions="*">
-                <Entry x:Name="txtDisplay" Text="{Binding Path=Display, Mode=TwoWay}" CursorPosition="{Binding Path=DisplayCaretPos, Mode=TwoWay}"
-                       SelectionLength="{Binding Path=DisplaySelectedLength, Mode=TwoWay}" FontFamily="LcdSolid" FontSize="36"
-                       FontAutoScalingEnabled="True" BackgroundColor="{StaticResource LcdDisplay1}" Grid.Row="0" Margin="0">
-                </Entry>
-                <Entry x:Name="txtMassage" Text="{Binding Path=ErrorMsg, Mode=TwoWay}" FontFamily="LcdSolid" 
-                       FontSize="12" FontAutoScalingEnabled="True" BackgroundColor="{StaticResource LcdDisplay1}" Grid.Row="1"
-                       Margin="0" />
+                <Entry x:Name="txtDisplay" Grid.Row="0" Margin="0"
+                       Text="{Binding Path=Display, Mode=TwoWay}" 
+                       CursorPosition="{Binding Path=DisplayCaretPos, Mode=TwoWay}"
+                       SelectionLength="{Binding Path=DisplaySelectedLength, Mode=TwoWay}" 
+                       FontFamily="{DynamicResource DisplayFont}" 
+                       FontSize="{DynamicResource DisplayFontSize}"
+                       FontAutoScalingEnabled="True" 
+                       Background="{DynamicResource DisplayBackground}" />
+                <Entry x:Name="txtMassage" Grid.Row="1" Margin="0" 
+                       Text="{Binding Path=ErrorMsg, Mode=TwoWay}" 
+                       FontFamily="{DynamicResource DisplayFont}" 
+                       FontSize="{DynamicResource DisplayFontSize_small}" 
+                       FontAutoScalingEnabled="True" 
+                       Background="{DynamicResource DisplayBackground}" />
             </Grid>
         </Border>
 
@@ -61,10 +68,15 @@
             <local:InsertBtn x:Name="btnTan" Text="tan" Grid.Column="2" Grid.Row="4" CommandParameter="tan(" />
             <local:InsertBtn x:Name="btnCot" Text="cot" Grid.Column="3" Grid.Row="4" CommandParameter="cot(" />
             <local:InsertBtn x:Name="btnPi" Text="pi" Grid.Column="4" Grid.Row="4"  CommandParameter="3.1415926535897932384626433833"/>
-            
+
             <local:InsertBtn x:Name="btnLn" Text="ln" Grid.Column="0" Grid.Row="5"  CommandParameter="ln("/>
             <local:InsertBtn x:Name="btnLog10" Text="log10" Grid.Column="1" Grid.Row="5"  CommandParameter="log10("/>
         </Grid>
+
+        <StackLayout Orientation="Horizontal" Grid.Row="2" Margin="8">
+            <RadioButton x:Name="rbtnNormal" Content="Simple" CheckedChanged="Normal_CheckedChanged" IsChecked="True" FontAttributes="Italic"></RadioButton>
+            <RadioButton x:Name="rbtnRetro" Content="Retro" CheckedChanged="Retro_CheckedChanged" FontAttributes="Italic"></RadioButton>
+        </StackLayout>
     </Grid>
 
 </ContentPage>

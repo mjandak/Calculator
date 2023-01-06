@@ -1,4 +1,5 @@
-﻿using CalculatorMAUI.ViewModel;
+﻿using CalculatorMAUI.Resources.Themes;
+using CalculatorMAUI.ViewModel;
 using Microsoft.Maui.Handlers;
 
 namespace CalculatorMAUI
@@ -42,6 +43,23 @@ namespace CalculatorMAUI
                 txtDisplay.Text = txtDisplay.Text.Remove(cursorPosition - 1, 1);
                 txtDisplay.Focus();
                 txtDisplay.CursorPosition = cursorPosition - 1;
+            }
+        }
+
+        private void Normal_CheckedChanged(object sender, CheckedChangedEventArgs e)
+        {
+            if (e.Value)
+            {
+                App.SetTheme(Themes.Simple);
+            }
+
+        }
+
+        private void Retro_CheckedChanged(object sender, CheckedChangedEventArgs e)
+        {
+            if (e.Value)
+            {
+                App.SetTheme(Themes.Retro);
             }
         }
     }

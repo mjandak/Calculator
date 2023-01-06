@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CalcularorInterfaces
+namespace CalculatorMAUI.Resources.Themes
 {
-    public interface IMathExprProvider
+    public enum Themes : byte
     {
-        string Evaluate(string expression);
+        Simple,
+        Retro
     }
 }
