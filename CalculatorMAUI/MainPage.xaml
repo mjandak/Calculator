@@ -5,13 +5,20 @@
     <Grid RowDefinitions="auto,8*,*" ColumnDefinitions="*">
         <Border Grid.Row="0" StrokeThickness="2" Stroke="{DynamicResource DisplayBorder}" Margin="8,8,8,0">
             <Grid RowDefinitions="auto, auto" ColumnDefinitions="*">
-                <Entry x:Name="txtDisplay" Text="{Binding Path=Display, Mode=TwoWay}" CursorPosition="{Binding Path=DisplayCaretPos, Mode=TwoWay}"
-                       SelectionLength="{Binding Path=DisplaySelectedLength, Mode=TwoWay}" FontFamily="{DynamicResource DisplayFont}" FontSize="{DynamicResource DisplayFontSize}"
-                       FontAutoScalingEnabled="True" Background="{DynamicResource DisplayBackground}" Grid.Row="0" Margin="0">
-                </Entry>
-                <Entry x:Name="txtMassage" Text="{Binding Path=ErrorMsg, Mode=TwoWay}" FontFamily="{DynamicResource DisplayFont}" 
-                       FontSize="{DynamicResource DisplayFontSize_small}" FontAutoScalingEnabled="True" 
-                       Background="{DynamicResource DisplayBackground}" Grid.Row="1" Margin="0" />
+                <Entry x:Name="txtDisplay" Grid.Row="0" Margin="0"
+                       Text="{Binding Path=Display, Mode=TwoWay}" 
+                       CursorPosition="{Binding Path=DisplayCaretPos, Mode=TwoWay}"
+                       SelectionLength="{Binding Path=DisplaySelectedLength, Mode=TwoWay}" 
+                       FontFamily="{DynamicResource DisplayFont}" 
+                       FontSize="{DynamicResource DisplayFontSize}"
+                       FontAutoScalingEnabled="True" 
+                       Background="{DynamicResource DisplayBackground}" />
+                <Entry x:Name="txtMassage" Grid.Row="1" Margin="0" 
+                       Text="{Binding Path=ErrorMsg, Mode=TwoWay}" 
+                       FontFamily="{DynamicResource DisplayFont}" 
+                       FontSize="{DynamicResource DisplayFontSize_small}" 
+                       FontAutoScalingEnabled="True" 
+                       Background="{DynamicResource DisplayBackground}" />
             </Grid>
         </Border>
 
@@ -70,7 +77,6 @@
             <RadioButton x:Name="rbtnNormal" Content="Simple" CheckedChanged="Normal_CheckedChanged" IsChecked="True" FontAttributes="Italic"></RadioButton>
             <RadioButton x:Name="rbtnRetro" Content="Retro" CheckedChanged="Retro_CheckedChanged" FontAttributes="Italic"></RadioButton>
         </StackLayout>
-
     </Grid>
 
 </ContentPage>
