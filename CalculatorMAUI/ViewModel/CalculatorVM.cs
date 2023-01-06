@@ -18,8 +18,8 @@ namespace CalculatorMAUI.ViewModel
 
         public ICommand DisplayCmd { get; set; }
         public ICommand Insert { get; private set; }
-        //public ICommand Backspace { get; private set; }
         public ICommand Calculate { get; private set; }
+        public ICommand Clear { get; private set; }
 
         /// <summary>
         /// Caret position or selection start position. Zero based.
@@ -68,33 +68,14 @@ namespace CalculatorMAUI.ViewModel
         }
 
         public event Action<string> BtnPressedExecuted;
-        //public event Action BackspaceExecuted;
 
         public CalculatorVM(IMathExprProvider mathExprProvider)
         {
             Insert = new Command<string>(ExecuteInsert);
-            //Backspace = new Command(ExecuteBackspace);
             Calculate = new Command(Calulate);
+            Clear = new Command(_ => Display = string.Empty);
             this.mathExprProvider = mathExprProvider;
         }
-
-        //private void ExecuteBackspace()
-        //{
-        //    if (DisplaySelectedLength > 0)
-        //    {
-        //        Display = Display.Remove(DisplayCaretPos, DisplaySelectedLength);
-        //        DisplaySelectedLength = 0;
-        //    }
-        //    else
-        //    {
-        //        if (DisplayCaretPos != 0)
-        //        {
-        //            Display = Display.Remove(DisplayCaretPos - 1, 1);
-        //            DisplayCaretPos--;
-        //        }
-        //    }
-        //    BackspaceExecuted();
-        //}
 
         private void ExecuteInsert(string command)
         {

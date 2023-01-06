@@ -39,38 +39,41 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <local:InsertBtn x:Name="btn7" Text="7" Grid.Row="0" Grid.Column="0" />
-            <local:InsertBtn x:Name="btn8" Text="8" Grid.Row="0" Grid.Column="1" />
-            <local:InsertBtn x:Name="btn9" Text="9" Grid.Row="0" Grid.Column="2" />
-            <Button x:Name="btnEq" Text="=" Grid.Row="0" Grid.Column="3" Command="{Binding Calculate}" />
-            <Button x:Name="btnBackspace" Text="&#9003;" Grid.Row="0" Grid.Column="4" Clicked="btnBackspace_Clicked" />
+            <local:InsertBtn Grid.Row="0" Grid.Column="0" x:Name="btn7" Text="7" />
+            <local:InsertBtn Grid.Row="0" Grid.Column="1" x:Name="btn8" Text="8" />
+            <local:InsertBtn Grid.Row="0" Grid.Column="2" x:Name="btn9" Text="9" />
+            <Button          Grid.Row="0" Grid.Column="3" x:Name="btnC" Text="C" Command="{Binding Clear}" Background="#cc7562" />
+            <Button          Grid.Row="0" Grid.Column="4" x:Name="btnBackspace" Text="&#9003;" Clicked="btnBackspace_Clicked" Background="#cc7562" />
 
-            <local:InsertBtn x:Name="btn4" Text="4" Grid.Column="0" Grid.Row="1" />
-            <local:InsertBtn x:Name="btn5" Text="5" Grid.Column="1" Grid.Row="1" />
-            <local:InsertBtn x:Name="btn6" Text="6" Grid.Column="2" Grid.Row="1" />
-            <local:InsertBtn x:Name="btnAdd" Text="+" Grid.Column="3" Grid.Row="1" />
-            <local:InsertBtn x:Name="btnSub" Text="-" Grid.Column="4" Grid.Row="1" />
+            <local:InsertBtn Grid.Row="1" Grid.Column="0" x:Name="btn4" Text="4" />
+            <local:InsertBtn Grid.Row="1" Grid.Column="1" x:Name="btn5" Text="5" />
+            <local:InsertBtn Grid.Row="1" Grid.Column="2" x:Name="btn6" Text="6" />
+            <local:InsertBtn Grid.Row="1" Grid.Column="3" x:Name="btnAdd" Text="+" />
+            <local:InsertBtn Grid.Row="1" Grid.Column="4" x:Name="btnSub" Text="-" />
 
-            <local:InsertBtn x:Name="btn1" Text="1" Grid.Column="0" Grid.Row="2" CommandParameter="1" />
-            <local:InsertBtn x:Name="btn2" Text="2" Grid.Column="1" Grid.Row="2" CommandParameter="2" />
-            <local:InsertBtn x:Name="btn3" Text="3" Grid.Column="2" Grid.Row="2" CommandParameter="3" />
-            <local:InsertBtn x:Name="btnMul" Text="*" Grid.Column="3" Grid.Row="2" CommandParameter="*" />
-            <local:InsertBtn x:Name="btnDiv" Text="/" Grid.Column="4" Grid.Row="2" CommandParameter="/" />
+            <local:InsertBtn Grid.Row="2" Grid.Column="0" x:Name="btn1" Text="1" CommandParameter="1" />
+            <local:InsertBtn Grid.Row="2" Grid.Column="1" x:Name="btn2" Text="2" CommandParameter="2" />
+            <local:InsertBtn Grid.Row="2" Grid.Column="2" x:Name="btn3" Text="3" CommandParameter="3" />
+            <local:InsertBtn Grid.Row="2" Grid.Column="3" x:Name="btnMul" Text="*" CommandParameter="*" />
+            <local:InsertBtn Grid.Row="2" Grid.Column="4" x:Name="btnDiv" Text="/" CommandParameter="/" />
 
-            <local:InsertBtn x:Name="btn0" Text="0" Grid.Column="0" Grid.Row="3" />
-            <local:InsertBtn x:Name="btnDot" Text="." Grid.Column="1" Grid.Row="3" />
-            <local:InsertBtn x:Name="btnPower" Text="^" Grid.Column="2" Grid.Row="3" />
-            <local:InsertBtn x:Name="btnLeftBracket" Text="(" Grid.Column="3" Grid.Row="3" />
-            <local:InsertBtn x:Name="btnRightBracket" Text=")" Grid.Column="4" Grid.Row="3" />
+            <local:InsertBtn Grid.Row="3" Grid.Column="0" x:Name="btn0" Text="0" />
+            <local:InsertBtn Grid.Row="3" Grid.Column="1" x:Name="btnDot" Text="." />
+            <Button          Grid.Row="3" Grid.Column="2" x:Name="btnEq" Text="=" Command="{Binding Calculate}" Background="#ccb362" />
+            <local:InsertBtn Grid.Row="3" Grid.Column="3" x:Name="btnLeftBracket" Text="(" />
+            <local:InsertBtn Grid.Row="3" Grid.Column="4" x:Name="btnRightBracket" Text=")" />
 
-            <local:InsertBtn x:Name="btnSin" Text="sin" Grid.Column="0" Grid.Row="4" CommandParameter="sin(" />
-            <local:InsertBtn x:Name="btnCos" Text="cos" Grid.Column="1" Grid.Row="4" CommandParameter="cos(" />
-            <local:InsertBtn x:Name="btnTan" Text="tan" Grid.Column="2" Grid.Row="4" CommandParameter="tan(" />
-            <local:InsertBtn x:Name="btnCot" Text="cot" Grid.Column="3" Grid.Row="4" CommandParameter="cot(" />
-            <local:InsertBtn x:Name="btnPi" Text="pi" Grid.Column="4" Grid.Row="4"  CommandParameter="3.1415926535897932384626433833"/>
+            <local:InsertBtn Grid.Row="4" Grid.Column="0" x:Name="btnPower" Text="^" />
+            <local:InsertBtn Grid.Row="4" Grid.Column="1" x:Name="btnSin" Text="sin" CommandParameter="sin(" />
+            <local:InsertBtn Grid.Row="4" Grid.Column="2" x:Name="btnCos" Text="cos" CommandParameter="cos(" />
+            <local:InsertBtn Grid.Row="4" Grid.Column="3" x:Name="btnTan" Text="tan" CommandParameter="tan(" />
+            <local:InsertBtn Grid.Row="4" Grid.Column="4" x:Name="btnCot" Text="cot" CommandParameter="cot(" />
 
-            <local:InsertBtn x:Name="btnLn" Text="ln" Grid.Column="0" Grid.Row="5"  CommandParameter="ln("/>
-            <local:InsertBtn x:Name="btnLog10" Text="log10" Grid.Column="1" Grid.Row="5"  CommandParameter="log10("/>
+            <local:InsertBtn Grid.Row="5" Grid.Column="0" x:Name="btnPi" Text="pi" CommandParameter="3.1415926535897932384626433833"/>
+            <local:InsertBtn Grid.Row="5" Grid.Column="1" x:Name="btnLn" Text="ln" CommandParameter="ln(" />
+            <local:InsertBtn Grid.Row="5" Grid.Column="2" x:Name="btnLog10" Text="log10" CommandParameter="log10(" />
+            <local:InsertBtn Grid.Row="5" Grid.Column="3" x:Name="btnExp" Text="exp" CommandParameter="exp(" />
+
         </Grid>
 
         <StackLayout Orientation="Horizontal" Grid.Row="2" Margin="8">
